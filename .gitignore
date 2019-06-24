@@ -1,0 +1,4 @@
+target
+.sbtopts
+project/.sbt
+
