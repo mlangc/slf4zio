@@ -2,7 +2,7 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.1.0-SNAPSHOT"
+version := "0.1.0"
 
 scalaVersion := "2.12.8"
 crossScalaVersions := Seq("2.12.8")
@@ -111,3 +111,25 @@ libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC8-12"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.18" % Test
 
+publishTo := sonatypePublishTo.value
+
+publishMavenStyle := true
+
+// License of your choice
+licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+
+// Where is the source code hosted
+import xerial.sbt.Sonatype._
+sonatypeProjectHosting := Some(GitHubHosting("mlangc", "slf4zio", "m.langer798@gmail.com"))
+
+// or if you want to set these fields manually
+homepage := Some(url("https://github.com/mlangc/slf4zio"))
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/mlangc/slf4zio.git"),
+    "scm:git@github.com:mlangc/slf4zio.git"
+  )
+)
+developers := List(
+  Developer(id="mlangc", name="Matthias Langer", email="m.langer798@gmail.com", url=url("https://mlangc.wordpress.com/"))
+)
