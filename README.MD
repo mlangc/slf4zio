@@ -56,9 +56,11 @@ that implements the various `**IO` methods, like `debugIO`, `infoIO` and so fort
 logger using a [by-name parameter](https://docs.scala-lang.org/tour/by-name-parameters.html),
 logger initialization won't happen before `unsafeRun`, if you don't access the logger directly
 from non effectful code. To ensure referential transparency for creating an object of a class that
-inherits the `LoggingSupport` trait, you have wrap it's creation in an effect of its own.
-For practical purposes, you might consider obtaining a logger to be a pure operation as soon as the
-logging framework has finished its initialization, and not care too much about this subtlety.
+inherits the `LoggingSupport` trait even with outright broken or strange logger implementations,
+you have wrap the creation of the object in an effect of its own. It might make more sense to use
+another logger implementation though. For practical purposes, I would consider obtaining a 
+logger to be a pure operation as soon as the logging framework has finished its initialization,
+and not care too much about this subtlety.
 
 
 
