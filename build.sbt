@@ -2,7 +2,7 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.1.0"
+version := "0.2.0"
 
 scalaVersion := "2.12.8"
 crossScalaVersions := Seq("2.12.8")
@@ -110,6 +110,8 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26"
 libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC8-12"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.18" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test
+
 
 publishTo := sonatypePublishTo.value
 

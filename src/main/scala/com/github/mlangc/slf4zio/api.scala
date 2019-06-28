@@ -55,6 +55,15 @@ object api {
   def getLogger(clazz: Class[_]): Logger =
     LoggerFactory.getLogger(clazz)
 
+  def getLogger(name: String): Logger =
+    LoggerFactory.getLogger(name)
+
+  def makeLogger(name: String): UIO[Logger] =
+    UIO(getLogger(name))
+
+  def makeLogger[T](implicit classTag: ClassTag[T]): UIO[Logger] =
+    UIO(getLogger[T])
+
   trait LoggingSupport {
     @transient
     protected final lazy val logger: Logger = getLogger(getClass)
