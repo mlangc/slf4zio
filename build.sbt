@@ -107,7 +107,7 @@ scalacOptions ++= {
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26"
-libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC8-12"
+libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC10-1"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.18" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test
