@@ -75,7 +75,7 @@ object api {
           aOrE <- zio.either
           nanosAfter <- UIO(System.nanoTime())
           elapsed = Duration.fromNanos(nanosAfter - nanosBefore)
-          _ <- if (elapsed >= threshold) logger.debugIO(msg(elapsed)) else UIO.unit
+          _ <- ZIO.when(elapsed >= threshold)(logger.debugIO(msg(elapsed)))
         } yield aOrE
 
         for {
