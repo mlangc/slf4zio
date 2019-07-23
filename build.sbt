@@ -54,7 +54,6 @@ val scala212Opts = Seq(
   "-Ywarn-unused:patvars",             // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates",            // Warn if a private member is unused.
   "-Ywarn-value-discard",              // Warn when non-Unit expression results are unused.
-  "-opt:l:method",
 )
 
 // See https://nathankleyn.com/2019/05/13/recommended-scalac-flags-for-2-13/
