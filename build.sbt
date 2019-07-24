@@ -2,10 +2,10 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.2.0"
+version := "0.2.1"
 
 scalaVersion := "2.12.8"
-crossScalaVersions := Seq("2.12.8")
+crossScalaVersions := Seq("2.12.8", "2.11.12")
 
 // See https://tpolecat.github.io/2017/04/25/scalac-flags.html
 val scala212Opts = Seq(
@@ -98,8 +98,27 @@ val scala213Opts = Seq(
   "-Ycache-macro-class-loader:last-modified", // and macro definitions. This can lead to performance improvements.
 )
 
+val scala211Opts = Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfuture",
+  "-Ywarn-unused-import"
+)
+
 scalacOptions ++= {
   if (scalaVersion.value.startsWith("2.12.")) scala212Opts
+  else if (scalaVersion.value.startsWith("2.11.")) scala211Opts
   else scala213Opts
 }
 
