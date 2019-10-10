@@ -2,10 +2,10 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.2.1"
+version := "0.2.2"
 
-scalaVersion := "2.12.8"
-crossScalaVersions := Seq("2.12.8", "2.11.12")
+scalaVersion := "2.12.10"
+crossScalaVersions := Seq("2.12.10", "2.11.12", "2.13.1")
 
 // See https://tpolecat.github.io/2017/04/25/scalac-flags.html
 val scala212Opts = Seq(
@@ -125,9 +125,9 @@ scalacOptions ++= {
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26"
-libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC10-1"
+libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC14"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
-libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.18" % Test
+libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test
 
 

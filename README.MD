@@ -35,13 +35,13 @@ for {
 
 ### Using the LoggingSupport convenience trait
 ````scala
-import zio.TaskR
+import zio.RIO
 import zio.random
 import zio.random.Random
 import com.github.mlangc.slf4zio.api._
 
 class SomeClass extends LoggingSupport {
-  def doStuff: TaskR[Random, Unit] =
+  def doStuff: RIO[Random, Unit] =
     for {
       _ <- logger.warnIO("What the heck")
       _ <- random.nextBoolean.flatMap {
