@@ -130,10 +130,8 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test
 
-
-publishTo := sonatypePublishTo.value
-
 publishMavenStyle := true
+publishTo := sonatypePublishToBundle.value
 
 // License of your choice
 licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
@@ -150,6 +148,8 @@ scmInfo := Some(
     "scm:git@github.com:mlangc/slf4zio.git"
   )
 )
+
 developers := List(
   Developer(id="mlangc", name="Matthias Langer", email="m.langer798@gmail.com", url=url("https://mlangc.wordpress.com/"))
 )
+
