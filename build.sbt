@@ -125,10 +125,18 @@ scalacOptions ++= {
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26"
-libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC14"
+
+val zioVersion = "1.0.0-RC14"
+libraryDependencies += "dev.zio" %% "zio" % zioVersion
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test
+
+libraryDependencies ++= Seq(
+  "dev.zio" %% "zio-test"     % zioVersion % "test",
+  "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
+)
+
+testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
 
 publishMavenStyle := true
 publishTo := sonatypePublishToBundle.value
