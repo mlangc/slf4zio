@@ -2,7 +2,7 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.2.2"
+version := "0.3.0"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.12.10", "2.11.12", "2.13.1")
