@@ -124,7 +124,7 @@ scalacOptions ++= {
 
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.26"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.28"
 
 val zioVersion = "1.0.0-RC14"
 libraryDependencies += "dev.zio" %% "zio" % zioVersion

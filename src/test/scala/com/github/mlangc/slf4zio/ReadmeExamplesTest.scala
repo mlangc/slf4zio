@@ -1,8 +1,5 @@
 package com.github.mlangc.slf4zio
 
-import com.github.mlangc.slf4zio.api.Logging
-import zio.RIO
-import zio.random.Random
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
@@ -59,8 +56,8 @@ object ReadmeExamplesTest extends DefaultRunnableSpec(
     },
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.ZIO
       import zio.Task
+      import zio.ZIO
 
       val effect: ZIO[Logging, Throwable, Unit] = {
 
@@ -77,6 +74,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec(
 
       assertM(effect, isUnit)
     }.provideManaged {
+      import com.github.mlangc.slf4zio.api._
       import zio.UIO
 
       UIO {
