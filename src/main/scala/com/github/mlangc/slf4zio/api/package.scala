@@ -1,13 +1,20 @@
 package com.github.mlangc.slf4zio
 
-import org.slf4j.{Logger, LoggerFactory}
-import zio.{UIO, ZIO}
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import zio.UIO
+import zio.URIO
+import zio.ZIO
 
-import scala.concurrent.duration.Duration
 import scala.reflect.ClassTag
 
-object api {
+package object api {
   implicit final class Slf4jLoggerOps(logger: => Logger) {
+    def traceIO(msg: => String): UIO[Unit] = UIO {
+      if (logger.isTraceEnabled())
+        logger.trace(msg)
+    }
+
     def debugIO(msg: => String): UIO[Unit] = UIO {
       if (logger.isDebugEnabled)
         logger.debug(msg)
@@ -26,6 +33,11 @@ object api {
     def errorIO(msg: => String): UIO[Unit] = UIO {
       if (logger.isErrorEnabled())
         logger.error(msg)
+    }
+
+    def traceIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
+      if (logger.isTraceEnabled())
+        logger.trace(msg, th)
     }
 
     def debugIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
@@ -49,6 +61,11 @@ object api {
     }
   }
 
+  object logging extends Logging.Service[Logging] {
+    def logger: URIO[Logging, Logger] =
+      ZIO.accessM[Logging](_.logging.logger)
+  }
+
   def getLogger[T](implicit classTag: ClassTag[T]): Logger =
     getLogger(classTag.runtimeClass)
 
@@ -63,39 +80,4 @@ object api {
 
   def makeLogger[T](implicit classTag: ClassTag[T]): UIO[Logger] =
     UIO(getLogger[T])
-
-  trait LoggingSupport {
-    @transient
-    protected final lazy val logger: Logger = getLogger(getClass)
-
-    protected implicit final class ZioLoggerOps[R, E, A](zio: ZIO[R, E, A]) {
-      def logDebugPerformance(msg: Duration => String, threshold: Duration = Duration.Zero): ZIO[R, E, A] = {
-        def instrumented: ZIO[R, Nothing, Either[E, A]] = for {
-          nanosBefore <- UIO(System.nanoTime())
-          aOrE <- zio.either
-          nanosAfter <- UIO(System.nanoTime())
-          elapsed = Duration.fromNanos(nanosAfter - nanosBefore)
-          _ <- ZIO.when(elapsed >= threshold)(logger.debugIO(msg(elapsed)))
-        } yield aOrE
-
-        for {
-          debugEnabled <- UIO(logger.isDebugEnabled)
-          a <- if (debugEnabled) instrumented.absolve else zio
-        } yield a
-      }
-    }
-
-    protected final def logDebugPerformance[A](msg: Duration => String, threshold: Duration = Duration.Zero)(thunk: => A): A = {
-      if (!logger.isDebugEnabled) thunk else {
-        val nanosBefore = System.nanoTime()
-        try thunk finally {
-          val nanosAfter = System.nanoTime()
-          val elapsed = Duration.fromNanos(nanosAfter - nanosBefore)
-
-          if (elapsed >= threshold)
-            logger.debug(msg(elapsed))
-        }
-      }
-    }
-  }
 }

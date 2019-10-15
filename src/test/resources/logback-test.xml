@@ -14,7 +14,7 @@
     <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.debug" level="debug"/>
     <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.info" level="info"/>
 
-    <logger name="com.github.mlangc.slf4zio.ReadmeExamplesTest" level="debug"/>
+    <logger name="com.github.mlangc.slf4zio" level="trace"/>
 
     <root level="warn">
         <appender-ref ref="STDOUT"/>

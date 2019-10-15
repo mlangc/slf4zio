@@ -7,8 +7,8 @@
 If your code is based on [ZIO](https://zio.dev/) and you want to log with [SLF4J](https://www.slf4j.org/).
 
 ## When not to Use
-If you want to track logging effects using the [ZIO Environment](http://degoes.net/articles/zio-environment)
-try [zio-slf4j](https://github.com/NeQuissimus/zio-slf4j). If you are into Tagless Final,
+If you want to track logging effects using the [ZIO Environment](http://degoes.net/articles/zio-environment) exclusively, consider using
+[zio-slf4j](https://github.com/NeQuissimus/zio-slf4j). If you are into Tagless Final,
 take a look at [log4cats](https://github.com/ChristopherDavenport/log4cats).
 
 ## How to Use
@@ -16,41 +16,68 @@ take a look at [log4cats](https://github.com/ChristopherDavenport/log4cats).
 ```scala
 import com.github.mlangc.slf4zio.api._
 import zio.Task
-// ...
-class SomeClass
-// ...
-for {
-    logger <- makeLogger[SomeClass]
-    _ <- logger.debugIO("Debug me tender")
+
+val effect: Task[Unit] = {
     // ...
-    _ <- Task {
-      // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
-      // effectful code directly:
-      logger.info("Don't be shy")
+    class SomeClass
+    // ...
+    for {
+      logger <- makeLogger[SomeClass]
+      _ <- logger.debugIO("Debug me tender")
       // ...
-      logger.warn("Please take me home")
-    }
-} yield ()
+      _ <- Task {
+        // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
+        // effectful code directly:
+        logger.info("Don't be shy")
+        // ...
+        logger.warn("Please take me home")
+      }
+    } yield ()
+}
+```
+
+### Using the Logging service
+```scala
+import com.github.mlangc.slf4zio.api._
+import zio.ZIO
+import zio.Task
+
+val effect: ZIO[Logging, Throwable, Unit] = {
+    for {
+      _ <- logging.warnIO("Surprise, surprise")
+      plainLogger <- logging.logger
+      _ <- Task {
+        plainLogger.debug("Shhh...")
+        plainLogger.warn("The devil always comes in disguise")
+      }
+      _ <- logging.traceIO("...")
+    } yield ()
+}
 ```
 
 ### Using the LoggingSupport convenience trait
 ````scala
+import com.github.mlangc.slf4zio.api._
 import zio.RIO
 import zio.random
 import zio.random.Random
-import com.github.mlangc.slf4zio.api._
 
-class SomeClass extends LoggingSupport {
-  def doStuff: RIO[Random, Unit] =
-    for {
-      _ <- logger.warnIO("What the heck")
-      _ <- random.nextBoolean.flatMap {
-        case true => logger.infoIO("Uff, that was close")
-        case false => logger.errorIO("Game over", new IllegalStateException("This is the end"))
-      }
-    } yield ()
+val effect: RIO[Random, Unit] = {
+    object SomeObject extends LoggingSupport {
+      def doStuff: RIO[Random, Unit] =
+        for {
+          _ <- logger.warnIO("What the heck")
+          _ <- random.nextBoolean.flatMap {
+            case true => logger.infoIO("Uff, that was close")
+            case false => logger.errorIO("Game over", new IllegalStateException("This is the end"))
+          }
+        } yield ()
+    }
+
+    SomeObject.doStuff
 }
 ````
+
 Note that the `logger` field in the `LoggingSupport` trait is lazy. Since the implicit class
 that implements the various `**IO` methods, like `debugIO`, `infoIO` and so forth, wraps the
 logger using a [by-name parameter](https://docs.scala-lang.org/tour/by-name-parameters.html),

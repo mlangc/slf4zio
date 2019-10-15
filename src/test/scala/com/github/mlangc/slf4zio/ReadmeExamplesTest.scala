@@ -1,15 +1,19 @@
 package com.github.mlangc.slf4zio
 
+import com.github.mlangc.slf4zio.api.Logging
+import zio.RIO
+import zio.random.Random
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
 
 object ReadmeExamplesTest extends DefaultRunnableSpec(
   suite("ReadmeExamplesTest")(
-    testM("creating loggins as needed") {
-      val effect = {
-        import com.github.mlangc.slf4zio.api._
-        import zio.Task
+    testM("creating loggers as needed") {
+      import com.github.mlangc.slf4zio.api._
+      import zio.Task
+
+      val effect: Task[Unit] = {
         // ...
         class SomeClass
         // ...
@@ -30,13 +34,14 @@ object ReadmeExamplesTest extends DefaultRunnableSpec(
       assertM(effect, isUnit)
     },
     testM("Using the convenience trait") {
-      val effect = {
-        import com.github.mlangc.slf4zio.api._
-        import zio.RIO
-        import zio.random
-        import zio.random.Random
+      import com.github.mlangc.slf4zio.api._
+      import zio.RIO
+      import zio.random
+      import zio.random.Random
 
-        class SomeClass extends LoggingSupport {
+      val effect: RIO[Random, Unit] = {
+
+        object SomeObject extends LoggingSupport {
           def doStuff: RIO[Random, Unit] =
             for {
               _ <- logger.warnIO("What the heck")
@@ -47,10 +52,40 @@ object ReadmeExamplesTest extends DefaultRunnableSpec(
             } yield ()
         }
 
-        new SomeClass().doStuff
+        SomeObject.doStuff
       }
 
       assertM(effect, isUnit)
+    },
+    testM("Using the service") {
+      import com.github.mlangc.slf4zio.api._
+      import zio.ZIO
+      import zio.Task
+
+      val effect: ZIO[Logging, Throwable, Unit] = {
+
+        for {
+          _ <- logging.warnIO("Surprise, surprise")
+          plainLogger <- logging.logger
+          _ <- Task {
+            plainLogger.debug("Shhh...")
+            plainLogger.warn("The devil always comes in disguise")
+          }
+          _ <- logging.traceIO("...")
+        } yield ()
+      }
+
+      assertM(effect, isUnit)
+    }.provideManaged {
+      import zio.UIO
+
+      UIO {
+        class SomeClass
+
+        new Logging.ForClass {
+          protected def clazz = classOf[SomeClass]
+        }
+      }.toManaged_
     }
   )
 )
