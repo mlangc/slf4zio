@@ -47,18 +47,18 @@ object Logging {
   }
 
   trait ForClass extends Logging {
-    protected def clazz: Class[_]
+    protected def loggingClass: Class[_]
 
     val logging: Service[Any] = new Service[Any] with Serializable {
       @transient
-      private lazy val theLogger = getLogger(clazz)
+      private lazy val theLogger = getLogger(loggingClass)
 
       def logger: UIO[Logger] = UIO(theLogger)
     }
   }
 
   object Global extends ForClass {
-    protected def clazz: Class[_] = getClass
+    protected def loggingClass: Class[_] = getClass
   }
 }
 

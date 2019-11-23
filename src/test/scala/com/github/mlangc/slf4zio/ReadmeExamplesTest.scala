@@ -81,7 +81,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec(
         class SomeClass
 
         new Logging.ForClass {
-          protected def clazz = classOf[SomeClass]
+          protected def loggingClass = classOf[SomeClass]
         }
       }.toManaged_
     }
