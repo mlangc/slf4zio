@@ -4,8 +4,8 @@ import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
 
-object ReadmeExamplesTest extends DefaultRunnableSpec(
-  suite("ReadmeExamplesTest")(
+object ReadmeExamplesTest extends DefaultRunnableSpec {
+  def spec = suite("ReadmeExamplesTest")(
     testM("creating loggers as needed") {
       import com.github.mlangc.slf4zio.api._
       import zio.Task
@@ -84,6 +84,5 @@ object ReadmeExamplesTest extends DefaultRunnableSpec(
           protected def loggingClass = classOf[SomeClass]
         }
       }.toManaged_
-    }
-  )
-)
+    })
+}
