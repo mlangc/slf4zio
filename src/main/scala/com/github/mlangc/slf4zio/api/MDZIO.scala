@@ -6,6 +6,15 @@ import zio.ZIO
 
 import scala.collection.JavaConverters._
 
+/**
+ * Convenience APIs for interacting with the MDC context.
+ *
+ * ==Important==
+ * Make sure that you use a fiber aware MDC implementation, as provided
+ * for example by <a href="https://github.com/mlangc/zio-interop-log4j2">zio-interop-log4j2</a>.
+ * Using the convenience wrappers found here won't make the underlying MDC context implementation
+ * aware of ZIO fibers.
+ */
 object MDZIO {
   def put(key: String, value: String): UIO[Unit] =
     UIO(MDC.put(key, value))
@@ -28,6 +37,9 @@ object MDZIO {
   def removeAll(keys: Iterable[String]): UIO[Unit] =
     ZIO.foreach_(keys)(remove)
 
+  /**
+   * Puts the given key value pairs in the context, executes the given action, and restores the original context.
+   */
   def doWith[R, E, A](pairs: Iterable[(String, String)])(zio: ZIO[R, E, A]): ZIO[R, E, A] =
     for {
       state1 <- ZIO.succeed(pairs.toMap)
