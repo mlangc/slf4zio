@@ -28,7 +28,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         } yield ()
       }
 
-      assertM(effect, isUnit)
+      assertM(effect)(isUnit)
     },
     testM("Using the convenience trait") {
       import com.github.mlangc.slf4zio.api._
@@ -52,7 +52,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         SomeObject.doStuff
       }
 
-      assertM(effect, isUnit)
+      assertM(effect)(isUnit)
     },
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
@@ -72,17 +72,10 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         } yield ()
       }
 
-      assertM(effect, isUnit)
-    }.provideManaged {
+      assertM(effect)(isUnit)
+    }.provideLayer {
       import com.github.mlangc.slf4zio.api._
-      import zio.UIO
-
-      UIO {
-        class SomeClass
-
-        new Logging.ForClass {
-          protected def loggingClass = classOf[SomeClass]
-        }
-      }.toManaged_
+      class SomeClass
+      Logging.forClass(classOf[SomeClass])
     })
 }

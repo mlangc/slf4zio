@@ -1,5 +1,6 @@
 package com.github.mlangc.slf4zio.api
 
+import com.github.ghik.silencer.silent
 import org.slf4j.MDC
 import zio.UIO
 import zio.ZIO
@@ -15,6 +16,7 @@ import scala.collection.JavaConverters._
  * Using the convenience wrappers found here won't make the underlying MDC context implementation
  * aware of ZIO fibers.
  */
+@silent("JavaConverters")
 object MDZIO {
   def put(key: String, value: String): UIO[Unit] =
     UIO(MDC.put(key, value))

@@ -3,12 +3,10 @@ package com.github.mlangc.slf4zio.api
 import org.slf4j.Logger
 import zio.UIO
 import zio.URIO
-
-trait Logging {
-  def logging: Logging.Service[Any]
-}
+import zio.ZLayer
 
 object Logging {
+
   trait Service[-R] {
     final def traceIO(msg: => String): URIO[R, Unit] =
       withUnderlying(_.traceIO(msg))
@@ -40,25 +38,30 @@ object Logging {
     final def errorIO(msg: => String, th: Throwable): URIO[R, Unit] =
       withUnderlying(_.errorIO(msg, th))
 
+    final def logIO(msg: => LogMessage): URIO[R, Unit] =
+      withUnderlying(_.logIO(msg))
+
     def logger: URIO[R, Logger]
 
     private def withUnderlying(op: Logger => UIO[Unit]): URIO[R, Unit] =
       logger >>= op
   }
 
-  trait ForClass extends Logging {
-    protected def loggingClass: Class[_]
-
-    val logging: Service[Any] = new Service[Any] with Serializable {
+  def forClass(clazz: Class[_]): ZLayer.NoDeps[Nothing, Logging] = ZLayer.succeed {
+    new Service[Any] with Serializable {
       @transient
-      private lazy val theLogger = getLogger(loggingClass)
+      private lazy val theLogger = getLogger(clazz)
 
       def logger: UIO[Logger] = UIO(theLogger)
     }
   }
 
-  object Global extends ForClass {
-    protected def loggingClass: Class[_] = getClass
+  def forLogger(getLogger: => Logger): ZLayer.NoDeps[Nothing, Logging] = ZLayer.succeed {
+    new Service[Any] with Serializable {
+      def logger: UIO[Logger] = UIO(getLogger)
+    }
   }
+
+  def global: ZLayer.NoDeps[Nothing, Logging] = forClass(Logging.getClass)
 }
 
