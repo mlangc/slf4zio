@@ -91,7 +91,7 @@ and not care too much about this subtlety.
 
 ### Using MDC convenience APIs
 SLF4ZIO also ships with a set of convenience APIs for `org.slf4j.MDC`. Note however, that traditional
-MDC implementations are based on thread local data, which doesn't at all work well with ZIO, where a
+MDC implementations are based on thread local data, which doesn't work at all with ZIO, where a
 single `zio.Fiber` might run on different threads during its lifetime, and a single thread might 
 accommodate multiple fibers. **If you want to use MDC logging in your ZIO based application, it is
 critical to use a fiber aware MDC implementation, as provided for example by 
