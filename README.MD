@@ -89,6 +89,16 @@ another logger implementation though. For practical purposes, I would consider o
 logger to be a pure operation as soon as the logging framework has finished its initialization,
 and not care too much about this subtlety.
 
+### Using MDC convenience APIs
+SLF4ZIO also ships with a set of convenience APIs for `org.slf4j.MDC`. Note however, that traditional
+MDC implementations are based on thread local data, which doesn't at all work well with ZIO, where a
+single `zio.Fiber` might run on different threads during its lifetime, and a single thread might 
+accommodate multiple fibers. *If you want to use MDC logging in your ZIO based application, it is
+critical to use a fiber aware MDC implementation, as provided for example by 
+[zio-interop-log4j2](https://github.com/mlangc/zio-interop-log4j2). `MDZIO` is just a collection of
+convenience APIs for interacting with `org.slf4j.MDC` that doesn't add any functionality of its own.*
+
+
 
 
 
