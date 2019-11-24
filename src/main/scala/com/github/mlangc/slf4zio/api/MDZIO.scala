@@ -29,7 +29,13 @@ object MDZIO {
     ZIO.foreach_(keys)(remove)
 
   def doWith[R, E, A](pairs: Iterable[(String, String)])(zio: ZIO[R, E, A]): ZIO[R, E, A] =
-    putAll(pairs).toManaged(_ => removeAll(pairs.map(_._1))).use_(zio)
+    for {
+      state1 <- ZIO.succeed(pairs.toMap)
+      state0 <- getAll(state1.keys)
+      newKeys = state1.keySet.diff(state0.keySet)
+      a <- (putAll(state1) *> zio).ensuring(removeAll(newKeys) *> putAll(state0))
+    } yield a
+
 
   def doWith[R, E, A](pairs: (String, String)*)(zio: ZIO[R, E, A]): ZIO[R, E, A] =
     doWith(pairs)(zio)
@@ -39,4 +45,9 @@ object MDZIO {
 
   def setContextMap(map: Map[String, String]): UIO[Unit] =
     UIO(MDC.setContextMap(map.asJava))
+
+  private def getAll(keys: Iterable[String]): UIO[Map[String, String]] =
+    ZIO.foldLeft(keys)(Map.empty[String, String]) { (acc, key) =>
+      get(key).map(_.fold(acc)(v => acc + (key -> v)))
+    }
 }
