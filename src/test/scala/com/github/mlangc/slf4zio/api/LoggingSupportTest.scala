@@ -30,8 +30,8 @@ object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
           } yield assert(evts.size)(equalTo(2))
         },
         testM("Success and failures") {
-          val spec: LogSpec[Throwable, Any] = LogSpec.onSucceed(d => info"Success after ${d.render}") |+|
-            LogSpec.onError[Throwable]((d, e) => warn"Error $e after ${d.render}") |+|
+          val spec: LogSpec[Throwable, Any] = LogSpec.onSucceed(d => info"Success after ${d.render}") ++
+            LogSpec.onError[Throwable]((d, e) => warn"Error $e after ${d.render}") ++
             LogSpec.onTermination((d, c) => error"Fatal error $c after ${d.render}")
 
           for {

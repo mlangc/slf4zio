@@ -18,7 +18,11 @@
 
     <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.info" level="info"/>
 
-    <logger name="com.github.mlangc.slf4zio.api.LoggingSupportTest$" level="debug">
+    <logger name="com.github.mlangc.slf4zio.api.LoggingSupportTest$" level="trace">
+        <appender-ref ref="TEST"/>
+    </logger>
+
+    <logger name="com.github.mlangc.slf4zio.api.LoggingServiceTest$" level="trace">
         <appender-ref ref="TEST"/>
     </logger>
 
