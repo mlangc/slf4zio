@@ -20,7 +20,7 @@ object MDZIOTest extends DefaultRunnableSpec {
         _ <- MDZIO.clear()
         v3 <- MDZIO.get(x)
         v4 <- MDZIO.get(y)
-      } yield assert((v1, v2, v3, v4), equalTo((Some(a), Some(b), None, None)))
+      } yield assert((v1, v2, v3, v4))(equalTo((Some(a), Some(b), None, None)))
     },
     testM("doWith") {
       val (e, f, g) = ("e", "f", "g")
@@ -31,7 +31,7 @@ object MDZIOTest extends DefaultRunnableSpec {
       for {
         v1 <- MDZIO.doWith(e -> l, f -> m, g -> n)(ZIO.foreach(efg)(MDZIO.get))
         v2 <- ZIO.foreach(efg)(MDZIO.get)
-      } yield assert(v1.flatten, equalTo(lmn)) && assert(v2.flatten, isEmpty)
+      } yield assert(v1.flatten)(equalTo(lmn)) && assert(v2.flatten)(isEmpty)
     },
     testM("setContextMap") {
       val (r, s) = ("r", "s")
@@ -40,7 +40,7 @@ object MDZIOTest extends DefaultRunnableSpec {
         _ <- MDZIO.put(r, s)
         _ <- MDZIO.setContextMap(Map.empty)
         v <- MDZIO.get(r)
-      } yield assert(v, isNone)
+      } yield assert(v)(isNone)
     }
   )
 }

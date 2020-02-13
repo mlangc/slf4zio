@@ -126,7 +126,10 @@ scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-wa
 
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.28"
 
-val zioVersion = "1.0.0-RC17+6-daa6ab98"
+resolvers +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+
+val zioVersion = "1.0.0-RC17+367-7bbe95e9-SNAPSHOT"
 libraryDependencies += "dev.zio" %% "zio" % zioVersion
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
