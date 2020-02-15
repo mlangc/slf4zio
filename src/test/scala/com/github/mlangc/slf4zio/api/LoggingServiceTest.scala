@@ -2,6 +2,7 @@ package com.github.mlangc.slf4zio.api
 
 import ch.qos.logback.classic.Level
 import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.Slf4jTestUtils
 import zio.ZIO
 import zio.duration._
 import zio.test.Assertion._
@@ -45,4 +46,5 @@ object LoggingServiceTest extends DefaultRunnableSpec {
       }
     }
   ).provideLayer(Logging.forClass(getClass) ++ (environment.Live.default >>> TestClock.default))
+    .whenM(Slf4jTestUtils.waitForSlf4jInitialization.as(true))
 }

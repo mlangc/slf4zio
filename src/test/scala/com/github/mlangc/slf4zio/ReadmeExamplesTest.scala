@@ -28,7 +28,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         } yield ()
       }
 
-      assertM(effect)(isUnit)
+      assertM(Slf4jTestUtils.provideSlf4jInitialized *> effect)(isUnit)
     },
     testM("Using the convenience trait") {
       import com.github.mlangc.slf4zio.api._
@@ -77,5 +77,5 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       import com.github.mlangc.slf4zio.api._
       class SomeClass
       Logging.forClass(classOf[SomeClass])
-    })
+    }).whenM(Slf4jTestUtils.waitForSlf4jInitialization.as(true))
 }

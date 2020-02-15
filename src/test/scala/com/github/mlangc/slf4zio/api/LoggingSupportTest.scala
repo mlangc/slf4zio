@@ -1,8 +1,10 @@
 package com.github.mlangc.slf4zio.api
 
+
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.Slf4jTestUtils
 import zio.UIO
 import zio.ZIO
 import zio.test.Assertion
@@ -49,7 +51,7 @@ object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
         }
       )
     )
-  )
+  ).whenM(Slf4jTestUtils.waitForSlf4jInitialization.as(true))
 
   private def getLogEvents(p: ILoggingEvent => Boolean): UIO[List[ILoggingEvent]] =
     LogbackTestAppender.events.map { evts =>
