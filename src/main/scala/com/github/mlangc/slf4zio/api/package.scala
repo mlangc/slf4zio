@@ -126,9 +126,9 @@ package object api {
   implicit final class ZioLoggingOps[R, E, A](val zio: ZIO[R, E, A]) extends AnyVal {
     def perfLogR(spec: LogSpec[E, A]): ZIO[R with Logging with Clock, E, A] =
       if (spec.isNoOp) zio else clock.nanoTime.flatMap { t0 =>
-        def handleError(cause: Cause[E]): ZIO[Logging, E, Nothing] =
+        def handleError(cause: Cause[E]): ZIO[Logging with Clock, E, Nothing] =
           if (spec.onError.isEmpty && spec.onTermination.isEmpty) ZIO.halt(cause)
-          else UIO(System.nanoTime()).flatMap { t1 =>
+          else clock.nanoTime.flatMap { t1 =>
             val d = Duration.fromNanos(t1 - t0)
 
             val msgs = cause.failureOrCause match {
@@ -139,10 +139,10 @@ package object api {
             ZIO.foreach(msgs)(m => logging.logIO(m)) *> ZIO.halt(cause)
           }
 
-        def handleSuccess(a: A): ZIO[R with Logging, Nothing, A] =
+        def handleSuccess(a: A): ZIO[R with Logging with Clock, Nothing, A] =
           if (spec.onSucceed.isEmpty) ZIO.succeed(a) else {
             for {
-              t1 <- UIO(System.nanoTime())
+              t1 <- clock.nanoTime
               d = Duration.fromNanos(t1 - t0)
               msgs = spec.onSucceed.map(_ (d, a))
               _ <- ZIO.foreach(msgs)(m => logging.logIO(m))
