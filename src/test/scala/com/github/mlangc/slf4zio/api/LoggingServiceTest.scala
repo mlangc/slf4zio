@@ -28,12 +28,12 @@ object LoggingServiceTest extends DefaultRunnableSpec {
         consume(d) *> ZIO.dieMessage("Test")
 
       for {
-        _ <- consume(1.milli).perfLogR(spec)
-        _ <- consume(1.second).perfLogR(spec)
-        _ <- consumeAndFail(999.millis + 999.micros + 999.nanos).perfLogR(spec).ignore
-        _ <- consumeAndFail(1.second + 1.nano).perfLogR(spec).ignore
-        _ <- consumeAndDie(Duration.Zero).perfLogR(spec).catchAllCause(_ => ZIO.unit)
-        _ <- consumeAndDie(1.second).perfLogR(spec).catchAllCause(_ => ZIO.unit)
+        _ <- consume(1.milli).perfLogZ(spec)
+        _ <- consume(1.second).perfLogZ(spec)
+        _ <- consumeAndFail(999.millis + 999.micros + 999.nanos).perfLogZ(spec).ignore
+        _ <- consumeAndFail(1.second + 1.nano).perfLogZ(spec).ignore
+        _ <- consumeAndDie(Duration.Zero).perfLogZ(spec).catchAllCause(_ => ZIO.unit)
+        _ <- consumeAndDie(1.second).perfLogZ(spec).catchAllCause(_ => ZIO.unit)
         evts <- LogbackTestAppender.events.map(evts => evts.filter(evt => evt.getLoggerName == getClass.getCanonicalName))
         warnEvts = evts.filter(_.getLevel == Level.WARN)
         infoEvts = evts.filter(_.getLevel == Level.INFO)

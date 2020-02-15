@@ -19,5 +19,8 @@ object LogbackTestAppender {
 
   def events: IO[LogbackInitializationTimeout, List[ILoggingEvent]] =
     LogbackTestUtils.waitForLogbackInitialization *> UIO(eventsRef.get())
+
+  def eventsFor(clazz: Class[_]): IO[LogbackInitializationTimeout, List[ILoggingEvent]] =
+    events.map(_.filter(_.getLoggerName == clazz.getCanonicalName))
 }
 

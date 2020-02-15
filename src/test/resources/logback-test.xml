@@ -25,6 +25,10 @@
         <appender-ref ref="TEST"/>
     </logger>
 
+    <logger name="com.github.mlangc.slf4zio.api.RawPerfLogTest$" level="trace">
+        <appender-ref ref="TEST"/>
+    </logger>
+
     <root level="warn">
         <appender-ref ref="STDOUT"/>
     </root>
