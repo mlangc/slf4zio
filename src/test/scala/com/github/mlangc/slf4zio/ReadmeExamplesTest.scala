@@ -77,5 +77,5 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       import com.github.mlangc.slf4zio.api._
       class SomeClass
       Logging.forClass(classOf[SomeClass])
-    })
+    }) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
 }

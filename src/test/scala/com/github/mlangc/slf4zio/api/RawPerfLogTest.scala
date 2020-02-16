@@ -1,6 +1,7 @@
 package com.github.mlangc.slf4zio.api
 
 import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.LogbackTestUtils
 import zio.Task
 import zio.duration.durationInt
 import zio.test.DefaultRunnableSpec
@@ -29,5 +30,5 @@ object RawPerfLogTest extends DefaultRunnableSpec {
         evts <- LogbackTestAppender.eventsFor(this.getClass)
       } yield assert(evts)(Assertion.hasSize(Assertion.equalTo(2)))
     }
-  )
+  ) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
 }

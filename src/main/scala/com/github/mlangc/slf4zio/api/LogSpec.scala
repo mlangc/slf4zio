@@ -18,9 +18,9 @@ case class LogSpec[-E, -A](onError: List[(Duration, E) => LogMessage] = Nil,
 
   def withThreshold(threshold: Duration): LogSpec[E, A] = {
     LogSpec(
-      onError.map(f => (d, e) => if (d < threshold) LogMessage.Suppressed else f(d, e)),
-      onSucceed.map(f => (d, e) => if (d < threshold) LogMessage.Suppressed else f(d, e)),
-      onTermination.map(f => (d, c) => if (d < threshold) LogMessage.Suppressed else f(d, c)),
+      onError.map(f => (d: Duration, e: E) => if (d < threshold) LogMessage.Suppressed else f(d, e)),
+      onSucceed.map(f => (d: Duration, e: A) => if (d < threshold) LogMessage.Suppressed else f(d, e)),
+      onTermination.map(f => (d: Duration, c: Cause[Nothing]) => if (d < threshold) LogMessage.Suppressed else f(d, c))
     )
   }
 

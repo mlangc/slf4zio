@@ -8,16 +8,18 @@ import zio.Has
 import zio.UIO
 import zio.URIO
 import zio.ZIO
+import zio.ZLayer
 import zio.clock
 import zio.clock.Clock
 import zio.duration.Duration
 import zio.scheduler.Scheduler
 
 import scala.reflect.ClassTag
+import scala.util.Failure
+import scala.util.Success
 import scala.util.Try
 
 package object api {
-
   implicit final class Slf4jLoggerOps(logger: => Logger) {
     def traceIO(msg: => String): UIO[Unit] = UIO {
       if (logger.isTraceEnabled())
@@ -138,15 +140,77 @@ package object api {
             a
           }
 
-        res.fold(onError, onSuccess)
+        res match {
+          case Failure(e) => onError(e)
+          case Success(a) => onSuccess(a)
+        }
       }
+  }
+
+  object Logging {
+    trait Service[-R] {
+      final def traceIO(msg: => String): URIO[R, Unit] =
+        withUnderlying(_.traceIO(msg))
+
+      final def debugIO(msg: => String): URIO[R, Unit] =
+        withUnderlying(_.debugIO(msg))
+
+      final def infoIO(msg: => String): URIO[R, Unit] =
+        withUnderlying(_.infoIO(msg))
+
+      final def warnIO(msg: => String): URIO[R, Unit] =
+        withUnderlying(_.warnIO(msg))
+
+      final def errorIO(msg: => String): URIO[R, Unit] =
+        withUnderlying(_.errorIO(msg))
+
+      final def traceIO(msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.traceIO(msg, th))
+
+      final def debugIO(msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.debugIO(msg, th))
+
+      final def infoIO(msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.infoIO(msg, th))
+
+      final def warnIO(msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.warnIO(msg, th))
+
+      final def errorIO(msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.errorIO(msg, th))
+
+      final def logIO(msg: => LogMessage): URIO[R, Unit] =
+        withUnderlying(_.logIO(msg))
+
+      def logger: URIO[R, Logger]
+
+      private def withUnderlying(op: Logger => UIO[Unit]): URIO[R, Unit] =
+        logger >>= op
+    }
+
+    def forClass(clazz: Class[_]): ZLayer.NoDeps[Nothing, Logging] = ZLayer.succeed {
+      new Service[Any] with Serializable {
+        @transient
+        private lazy val theLogger = getLogger(clazz)
+
+        def logger: UIO[Logger] = UIO(theLogger)
+      }
+    }
+
+    def forLogger(getLogger: => Logger): ZLayer.NoDeps[Nothing, Logging] = ZLayer.succeed {
+      new Service[Any] with Serializable {
+        def logger: UIO[Logger] = UIO(getLogger)
+      }
+    }
+
+    def global: ZLayer.NoDeps[Nothing, Logging] = forClass(Logging.getClass)
   }
 
   type Logging = Has[Logging.Service[Any]]
 
-  object logging extends Logging.Service[Logging] {
+  val logging: Logging.Service[Logging] = new Logging.Service[Logging] {
     def logger: URIO[Logging, Logger] =
-      ZIO.accessM[Logging](_.get.logger)
+      ZIO.accessM[Logging](_.get[Logging.Service[Any]].logger)
   }
 
   def getLogger[T](implicit classTag: ClassTag[T]): Logger =
@@ -191,7 +255,7 @@ package object api {
 
   implicit final class ZioLoggingOps[R, E, A](val zio: ZIO[R, E, A]) {
     def perfLogZ(spec: LogSpec[E, A]): ZIO[R with Logging with Clock, E, A] =
-      ZIO.accessM[Logging](_.get.logger)
+      ZIO.accessM[Logging](_.get[Logging.Service[Any]].logger)
         .flatMap(_.perfLogZIO(zio)(spec))
   }
 }

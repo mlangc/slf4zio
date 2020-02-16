@@ -5,6 +5,7 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import com.github.mlangc.slf4zio.LogbackInitializationTimeout
 import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.LogbackTestUtils
 import zio.IO
 import zio.ZIO
 import zio.test.Assertion
@@ -34,7 +35,7 @@ object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
         testM("Success and failures") {
           val spec: LogSpec[Throwable, Any] = LogSpec.onSucceed(d => info"Success after ${d.render}") ++
             LogSpec.onError[Throwable]((d, e) => warn"Error $e after ${d.render}") ++
-            LogSpec.onTermination((d, c) => error"Fatal error $c after ${d.render}")
+            LogSpec.onTermination((d, c) => error"Fatal error ${c.prettyPrint} after ${d.render}")
 
           for {
             _ <- ZIO.unit.perfLog(spec)
@@ -51,7 +52,7 @@ object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
         }
       )
     )
-  )
+  ) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
 
   private def getLogEvents(p: ILoggingEvent => Boolean): IO[LogbackInitializationTimeout, List[ILoggingEvent]] =
     LogbackTestAppender.events.map { evts =>

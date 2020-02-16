@@ -2,6 +2,7 @@ package com.github.mlangc.slf4zio.api
 
 import ch.qos.logback.classic.Level
 import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.LogbackTestUtils
 import zio.ZIO
 import zio.duration._
 import zio.test.Assertion._
@@ -44,5 +45,6 @@ object LoggingServiceTest extends DefaultRunnableSpec {
           assert(errEvts)(hasSize(equalTo(1)))
       }
     }
-  ).provideLayer(Logging.forClass(getClass) ++ (environment.Live.default >>> TestClock.default))
+  ).provideLayer(Logging.forClass(getClass) ++ (environment.Live.default >>> TestClock.default)) @@
+    TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
 }
