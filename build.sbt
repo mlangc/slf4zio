@@ -2,10 +2,11 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.5.0-SNAPSHOT"
-
 scalaVersion := "2.13.1"
+
 crossScalaVersions := Seq("2.12.10", "2.11.12", "2.13.1")
+
+dynverSonatypeSnapshots in ThisBuild := true
 
 // See https://tpolecat.github.io/2017/04/25/scalac-flags.html
 val scala212Opts = Seq(
