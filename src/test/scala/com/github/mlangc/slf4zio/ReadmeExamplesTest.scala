@@ -38,10 +38,8 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       import zio.random
       import zio.random.Random
 
-      val effect: RIO[Random, Unit] = {
-
-        object SomeObject extends LoggingSupport {
-          def doStuff: RIO[Random, Unit] =
+      object SomeObject extends LoggingSupport {
+        def doStuff: RIO[Random, Unit] = {
             for {
               _ <- logger.warnIO("What the heck")
               _ <- random.nextBoolean.flatMap {
@@ -50,11 +48,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
               }
             } yield ()
         }
-
-        SomeObject.doStuff
       }
 
-      assertM(effect)(isUnit)
+      assertM(SomeObject.doStuff)(isUnit)
     },
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
