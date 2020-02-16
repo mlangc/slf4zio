@@ -1,5 +1,5 @@
 # SLF4ZIO
-*Integrates SLF4J with ZIO in the simplest possible manner.*
+*Integrates SLF4J with ZIO in a simple and unopinonated manner.*
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mlangc/slf4zio_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mlangc/slf4zio_2.12)
 
@@ -7,9 +7,9 @@
 If your code is based on [ZIO](https://zio.dev/) and you want to log with [SLF4J](https://www.slf4j.org/).
 
 ## How to Use
-There are different possibilities to use the library, depending on your coding style:
+The library supports three different coding styles, that you can mix and match according to your needs:
 
-### Creating loggers safely as needed
+### 1. Creating Loggers as Needed
 ```scala
 import com.github.mlangc.slf4zio.api._
 import zio.Task
@@ -33,7 +33,7 @@ val effect: Task[Unit] = {
 }
 ```
 
-### Using the Logging service
+### 2. Using the Logging Service
 ```scala
 import com.github.mlangc.slf4zio.api._
 import zio.ZIO
@@ -52,7 +52,7 @@ val effect: ZIO[Logging, Throwable, Unit] = {
 }
 ```
 
-### Using the LoggingSupport convenience trait
+### 3. Using the LoggingSupport Convenience Trait
 ````scala
 import com.github.mlangc.slf4zio.api._
 import zio.RIO
@@ -85,6 +85,10 @@ you have wrap the creation of the object in an effect of its own. It might make 
 another logger implementation though. For practical purposes, I would consider obtaining a 
 logger to be a pure operation as soon as the logging framework has finished its initialization,
 and not care too much about this subtlety.
+
+### Performance Logging
+Apart from providing ZIO aware wrappers for [SLF4J](https://www.slf4j.org/), the library might also
+help you with performance related logging.
 
 ### Using MDC convenience APIs
 SLF4ZIO also ships with a set of convenience APIs for `org.slf4j.MDC`. Note however, that traditional

@@ -83,7 +83,7 @@ package object api {
         case Level.TRACE => logger.trace(msg.text)
       }
 
-    def perfLogZIO[R, E, A](zio: ZIO[R, E, A])(spec: LogSpec[E, A]): ZIO[R with Clock, E, A] =
+    def perfLogZIO[R, E, A, E2 >: E, A2 >: A](zio: ZIO[R, E, A])(spec: LogSpec[E2, A2]): ZIO[R with Clock, E, A] =
       if (spec.isNoOp) zio else clock.nanoTime.flatMap { t0 =>
         def handleError(cause: Cause[E]): ZIO[Clock, E, Nothing] =
           if (spec.onError.isEmpty && spec.onTermination.isEmpty) ZIO.halt(cause)
@@ -204,6 +204,9 @@ package object api {
     }
 
     def global: ZLayer.NoDeps[Nothing, Logging] = forClass(Logging.getClass)
+
+    val any: ZLayer[Logging, Nothing, Logging] =
+      ZLayer.requires[Logging]
   }
 
   type Logging = Has[Logging.Service[Any]]
@@ -254,7 +257,7 @@ package object api {
   }
 
   implicit final class ZioLoggingOps[R, E, A](val zio: ZIO[R, E, A]) {
-    def perfLogZ(spec: LogSpec[E, A]): ZIO[R with Logging with Clock, E, A] =
+    def perfLogZ[E2 >: E, A2 >: A](spec: LogSpec[E2, A2]): ZIO[R with Logging with Clock, E, A] =
       ZIO.accessM[Logging](_.get[Logging.Service[Any]].logger)
         .flatMap(_.perfLogZIO(zio)(spec))
   }

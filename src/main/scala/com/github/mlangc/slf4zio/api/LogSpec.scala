@@ -14,7 +14,7 @@ case class LogSpec[-E, -A](onError: List[(Duration, E) => LogMessage] = Nil,
       onTermination = onTermination ::: other.onTermination
     )
 
-  def ++[E2, A2](other: LogSpec[E2, A2]) = combine(other)
+  def ++[E2 <: E, A2 <: A](other: LogSpec[E2, A2]) = combine(other)
 
   def withThreshold(threshold: Duration): LogSpec[E, A] = {
     LogSpec(

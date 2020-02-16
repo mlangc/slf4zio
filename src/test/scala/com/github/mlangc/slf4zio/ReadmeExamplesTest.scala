@@ -1,5 +1,7 @@
 package com.github.mlangc.slf4zio
 
+import com.github.mlangc.slf4zio.api.Logging
+import zio.scheduler.Scheduler
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
@@ -57,10 +59,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
       import zio.Task
-      import zio.ZIO
+      import zio.RIO
 
-      val effect: ZIO[Logging, Throwable, Unit] = {
-
+      val effect: RIO[Logging, Unit] = {
         for {
           _ <- logging.warnIO("Surprise, surprise")
           plainLogger <- logging.logger
@@ -73,9 +74,35 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       }
 
       assertM(effect)(isUnit)
-    }.provideLayer {
+    },
+    testM("Performance Logging - Using the Logging Service") {
       import com.github.mlangc.slf4zio.api._
-      class SomeClass
-      Logging.forClass(classOf[SomeClass])
-    }) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
+      import zio.duration.durationInt
+      import zio.ZIO
+      import zio.clock.Clock
+
+      // Simple specs can be combined using the `++` to obtain more complex specs
+      val logSpec1: LogSpec[Throwable, Int] =
+      LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
+        LogSpec.onError[Throwable]((d, th) => error"Failed after ${d.render} with $th") ++
+        LogSpec.onTermination((d, c) => error"Fatal failure after ${d.render}: ${c.prettyPrint}")
+
+      // A threshold can be applied to a LogSpec. Nothing will be logged, unless the threshold is exceeded.
+      val logSpec2: LogSpec[Any, Any] =
+        LogSpec.onSucceed(d => warn"Operation took ${d.render}")
+          .withThreshold(1.milli)
+
+      // Will behave like logSpec1 and eventually log a warning as specified in logSpec2
+      val logSpec3: LogSpec[Throwable, Int] = logSpec1 ++ logSpec2
+
+      val effect: ZIO[Clock with Logging, Nothing, Unit] = for {
+        _ <- ZIO.sleep(5.micros).perfLogZ(LogSpec.onSucceed(d => debug"Done after ${d.render}"))
+        _ <- ZIO.sleep(1.milli).as(42).perfLogZ(logSpec1)
+        _ <- ZIO.sleep(2.milli).perfLogZ(logSpec2)
+        _ <- ZIO.sleep(3.milli).as(23).perfLogZ(logSpec3)
+      } yield ()
+
+      assertM(effect.provideLayer(Logging.any ++ (Scheduler.live >>> Clock.live)))(isUnit)
+    }
+  ).provideLayer(Logging.forClass(getClass) ++ environment.TestEnvironment.any)
 }
