@@ -1,7 +1,8 @@
 # SLF4ZIO
 *Integrates SLF4J with ZIO in a simple and unopinonated manner.*
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.mlangc/slf4zio_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.mlangc/slf4zio_2.12)
+[![Latest Release](https://img.shields.io/maven-central/v/com.github.mlangc/slf4zio_2.13?color=green&label=latest-release)](https://oss.sonatype.org/content/repositories/releases/com/github/mlangc/slf4zio_2.13)
+[![Latest Snapshot](https://img.shields.io/nexus/s/com.github.mlangc/slf4zio_2.13?label=latest-snapshot&server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/snapshots/com/github/mlangc/slf4zio_2.13/)
 
 ## When to Use
 If your code is based on [ZIO](https://zio.dev/) and you want to log with [SLF4J](https://www.slf4j.org/).
