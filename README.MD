@@ -6,12 +6,9 @@
 ## When to Use
 If your code is based on [ZIO](https://zio.dev/) and you want to log with [SLF4J](https://www.slf4j.org/).
 
-## When not to Use
-If you want to track logging effects using the [ZIO Environment](http://degoes.net/articles/zio-environment) exclusively, consider using
-[zio-slf4j](https://github.com/NeQuissimus/zio-slf4j). If you are into Tagless Final,
-take a look at [log4cats](https://github.com/ChristopherDavenport/log4cats).
-
 ## How to Use
+There are different possibilities to use the library, depending on your coding style:
+
 ### Creating loggers safely as needed
 ```scala
 import com.github.mlangc.slf4zio.api._
@@ -97,6 +94,12 @@ accommodate multiple fibers. **If you want to use MDC logging in your ZIO based 
 critical to use a fiber aware MDC implementation, as provided for example by 
 [zio-interop-log4j2](https://github.com/mlangc/zio-interop-log4j2). `MDZIO` is just a collection of
 convenience APIs for interacting with `org.slf4j.MDC` that doesn't add any functionality of its own.**
+
+## Alternatives
+If you want to track logging effects using the [ZIO Environment](http://degoes.net/articles/zio-environment) exclusively, consider using
+[zio-slf4j](https://github.com/NeQuissimus/zio-slf4j). If you are into Tagless Final,
+take a look at [log4cats](https://github.com/ChristopherDavenport/log4cats).
+
 
 
 
