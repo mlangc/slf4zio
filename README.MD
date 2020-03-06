@@ -89,7 +89,8 @@ object SomeObject extends LoggingSupport {
         _ <- ZIO.sleep(8.millis).perfLog(
           // See below for more examples with `LogSpec`
           LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
-            .withThreshold(5.millis))
+            .withThreshold(5.millis)
+          )
       } yield ()
     }
 }
