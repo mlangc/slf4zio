@@ -48,4 +48,10 @@ object LogSpec {
 
   def onTermination(msg: Duration => LogMessage): LogSpec[Any, Any] =
     onTermination((d, _) => msg(d))
+
+  def onTerminationOrError[E](msg: (Duration, Cause[E]) => LogMessage): LogSpec[E, Any] =
+    onError[E]((d, e) => msg(d, Cause.fail(e))) ++ onTermination(msg)
+
+  def onTerminationOrError(msg: Duration => LogMessage): LogSpec[Any, Any] =
+    onTerminationOrError((d, _) => msg(d))
 }

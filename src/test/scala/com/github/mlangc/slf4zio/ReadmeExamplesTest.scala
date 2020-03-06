@@ -4,14 +4,19 @@ import com.github.mlangc.slf4zio.api.Logging
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
+import zio.test.environment.live
 
 object ReadmeExamplesTest extends DefaultRunnableSpec {
   def spec = suite("ReadmeExamplesTest")(
     testM("creating loggers as needed") {
       import com.github.mlangc.slf4zio.api._
+      import zio.duration.durationInt
+      import zio.clock.Clock
+      import zio.RIO
+      import zio.ZIO
       import zio.Task
 
-      val effect: Task[Unit] = {
+      val effect: RIO[Clock, Unit] = {
         // ...
         class SomeClass
         // ...
@@ -25,38 +30,61 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
             logger.info("Don't be shy")
             // ...
             logger.warn("Please take me home")
+            // ...
+          }
+          // ...
+          // Generate highly configurable performance logs with ease:
+          _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
+            // See below for more examples with `LogSpec`
+            LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
+              LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
           }
         } yield ()
       }
 
-      assertM(effect)(isUnit)
+      assertM(live(effect))(isUnit)
     },
     testM("Using the convenience trait") {
       import com.github.mlangc.slf4zio.api._
       import zio.RIO
+      import zio.ZIO
       import zio.random
       import zio.random.Random
+      import zio.clock.Clock
+      import zio.duration.durationInt
 
       object SomeObject extends LoggingSupport {
-        def doStuff: RIO[Random, Unit] = {
-            for {
-              _ <- logger.warnIO("What the heck")
-              _ <- random.nextBoolean.flatMap {
-                case true => logger.infoIO("Uff, that was close")
-                case false => logger.errorIO("Game over", new IllegalStateException("This is the end"))
-              }
-            } yield ()
+        def doStuff: RIO[Random with Clock, Unit] = {
+          for {
+            _ <- logger.warnIO("What the heck")
+            _ <- ZIO.ifM(random.nextBoolean)(
+              logger.infoIO("Uff, that was close"),
+              logger.errorIO("Game over", new IllegalStateException("This is the end"))
+            )
+
+            doEvenMoreStuff = ZIO.ifM(random.nextBoolean)(
+              ZIO.sleep(8.millis).as(42), ZIO.fail(new RuntimeException("That didn't work")))
+
+            // Generate highly configurable performance logs with ease:
+            _ <- doEvenMoreStuff.perfLog {
+              // See below for more examples with `LogSpec`
+              LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}").withThreshold(5.millis) ++
+                LogSpec.onError[Throwable]((d, e) => error"Darn, failed again with $e after only ${d.render}")
+            }
+          } yield ()
         }
       }
 
-      assertM(SomeObject.doStuff)(isUnit)
+      assertM(live(SomeObject.doStuff.ignore))(isUnit)
     },
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
       import zio.RIO
+      import zio.ZIO
       import zio.Task
+      import zio.clock.Clock
 
-      val effect: RIO[Logging, Unit] = {
+      val effect: RIO[Logging with Clock, Unit] =
         for {
           _ <- logging.warnIO("Surprise, surprise")
           plainLogger <- logging.logger
@@ -65,8 +93,10 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
             plainLogger.warn("The devil always comes in disguise")
           }
           _ <- logging.traceIO("...")
+          getNumber = ZIO.succeed(42)
+          // See below for more examples with `LogSpec`
+          _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
         } yield ()
-      }
 
       assertM(effect)(isUnit)
     },
@@ -78,9 +108,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
 
       // Simple specs can be combined using the `++` to obtain more complex specs
       val logSpec1: LogSpec[Throwable, Int] =
-      LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
-        LogSpec.onError[Throwable]((d, th) => error"Failed after ${d.render} with $th") ++
-        LogSpec.onTermination((d, c) => error"Fatal failure after ${d.render}: ${c.prettyPrint}")
+        LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
+          LogSpec.onError[Throwable]((d, th) => error"Failed after ${d.render} with $th") ++
+          LogSpec.onTermination((d, c) => error"Fatal failure after ${d.render}: ${c.prettyPrint}")
 
       // A threshold can be applied to a LogSpec. Nothing will be logged, unless the threshold is exceeded.
       val logSpec2: LogSpec[Any, Any] =
@@ -97,7 +127,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         _ <- ZIO.sleep(3.milli).as(23).perfLogZ(logSpec3)
       } yield ()
 
-      assertM(effect.provideLayer(Logging.any ++ Clock.live))(isUnit)
+      assertM(effect.provideSomeLayer[Logging](Clock.live))(isUnit)
     }
   ).provideLayer(Logging.forClass(getClass) ++ environment.TestEnvironment.any)
 }

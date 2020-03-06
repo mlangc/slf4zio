@@ -13,66 +13,89 @@ The library supports three different coding styles, that you can mix and match a
 ### 1. Creating Loggers as Needed
 ```scala
 import com.github.mlangc.slf4zio.api._
+import zio.duration.durationInt
+import zio.clock.Clock
+import zio.RIO
+import zio.ZIO
 import zio.Task
 
-val effect: Task[Unit] = {
+val effect: RIO[Clock, Unit] = {
+// ...
+class SomeClass
+// ...
+for {
+  logger <- makeLogger[SomeClass]
+  _ <- logger.debugIO("Debug me tender")
+  // ...
+  _ <- Task {
+    // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
+    // effectful code directly:
+    logger.info("Don't be shy")
     // ...
-    class SomeClass
+    logger.warn("Please take me home")
     // ...
-    for {
-      logger <- makeLogger[SomeClass]
-      _ <- logger.debugIO("Debug me tender")
-      // ...
-      _ <- Task {
-        // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
-        // effectful code directly:
-        logger.info("Don't be shy")
-        // ...
-        logger.warn("Please take me home")
-      }
-    } yield ()
+  }
+  // ...
+  // Generate highly configurable performance logs with ease:
+  _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
+    LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
+      LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
+  }
+} yield ()
 }
 ```
 
 ### 2. Using the Logging Service
 ```scala
 import com.github.mlangc.slf4zio.api._
+import zio.RIO
 import zio.ZIO
 import zio.Task
+import zio.clock.Clock
 
-val effect: ZIO[Logging, Throwable, Unit] = {
-    for {
-      _ <- logging.warnIO("Surprise, surprise")
-      plainLogger <- logging.logger
-      _ <- Task {
-        plainLogger.debug("Shhh...")
-        plainLogger.warn("The devil always comes in disguise")
-      }
-      _ <- logging.traceIO("...")
-    } yield ()
-}
+val effect: RIO[Logging with Clock, Unit] =
+for {
+  _ <- logging.warnIO("Surprise, surprise")
+  plainLogger <- logging.logger
+  _ <- Task {
+    plainLogger.debug("Shhh...")
+    plainLogger.warn("The devil always comes in disguise")
+  }
+  _ <- logging.traceIO("...")
+  getNumber = ZIO.succeed(42)
+  _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
+} yield ()
 ```
 
 ### 3. Using the LoggingSupport Convenience Trait
 ````scala
 import com.github.mlangc.slf4zio.api._
 import zio.RIO
+import zio.ZIO
 import zio.random
 import zio.random.Random
+import zio.clock.Clock
+import zio.duration.durationInt
 
-val effect: RIO[Random, Unit] = {
-    object SomeObject extends LoggingSupport {
-      def doStuff: RIO[Random, Unit] =
-        for {
-          _ <- logger.warnIO("What the heck")
-          _ <- random.nextBoolean.flatMap {
-            case true => logger.infoIO("Uff, that was close")
-            case false => logger.errorIO("Game over", new IllegalStateException("This is the end"))
-          }
-        } yield ()
+object SomeObject extends LoggingSupport {
+    def doStuff: RIO[Random with Clock, Unit] = {
+      for {
+        _ <- logger.warnIO("What the heck")
+        _ <- ZIO.ifM(random.nextBoolean)(
+          logger.infoIO("Uff, that was close"),
+          logger.errorIO("Game over", new IllegalStateException("This is the end"))
+        )
+
+        doEvenMoreStuff = ZIO.ifM(random.nextBoolean)(
+          ZIO.sleep(8.millis).as(42), ZIO.fail(new RuntimeException("That didn't work")))
+
+        // Generate highly configurable performance logs with ease:
+        _ <- doEvenMoreStuff.perfLog {
+          LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}").withThreshold(5.millis) ++
+            LogSpec.onError[Throwable]((d, e) => error"Darn, failed again with $e after only ${d.render}")
+        }
+      } yield ()
     }
-
-    SomeObject.doStuff
 }
 ````
 
@@ -89,7 +112,26 @@ and not care too much about this subtlety.
 
 ### Performance Logging
 Apart from providing ZIO aware wrappers for [SLF4J](https://www.slf4j.org/), the library might also
-help you with performance related logging.
+help you with performance related logging. The examples from above are meant to give you the overall
+idea. Here is another snippet, that is meant to illustrate how to build complex `LogSpec`s from simple
+ones, utilizing the underlying monoidial structure:
+
+```scala
+import com.github.mlangc.slf4zio.api._
+// Simple specs can be combined using the `++` to obtain more complex specs
+val logSpec1: LogSpec[Throwable, Int] =
+LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
+  LogSpec.onError[Throwable]((d, th) => error"Failed after ${d.render} with $th") ++
+  LogSpec.onTermination((d, c) => error"Fatal failure after ${d.render}: ${c.prettyPrint}")
+
+// A threshold can be applied to a LogSpec. Nothing will be logged, unless the threshold is exceeded.
+val logSpec2: LogSpec[Any, Any] =
+LogSpec.onSucceed(d => warn"Operation took ${d.render}")
+  .withThreshold(1.milli)
+
+// Will behave like logSpec1 and eventually log a warning as specified in logSpec2
+val logSpec3: LogSpec[Throwable, Int] = logSpec1 ++ logSpec2
+```
 
 ### Using MDC convenience APIs
 SLF4ZIO also ships with a set of convenience APIs for `org.slf4j.MDC`. Note however, that traditional
