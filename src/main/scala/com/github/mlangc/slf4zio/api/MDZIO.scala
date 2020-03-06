@@ -66,4 +66,7 @@ abstract class MDZIO {
     }
 }
 
+/**
+ * See also [[Logging.Service.mdzio]] if you want all logging related calls go through the service.
+ */
 object MDZIO extends MDZIO
