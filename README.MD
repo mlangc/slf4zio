@@ -121,14 +121,14 @@ import com.github.mlangc.slf4zio.api._
 
 // Simple specs can be combined using the `++` to obtain more complex specs
 val logSpec1: LogSpec[Throwable, Int] =
-LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
-  LogSpec.onError[Throwable]((d, th) => error"Failed after ${d.render} with $th") ++
-  LogSpec.onTermination((d, c) => error"Fatal failure after ${d.render}: ${c.prettyPrint}")
+    LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
+      LogSpec.onError[Throwable]((d, th) => error"Failed after ${d.render} with $th") ++
+      LogSpec.onTermination((d, c) => error"Fatal failure after ${d.render}: ${c.prettyPrint}")
 
 // A threshold can be applied to a LogSpec. Nothing will be logged, unless the threshold is exceeded.
 val logSpec2: LogSpec[Any, Any] =
-LogSpec.onSucceed(d => warn"Operation took ${d.render}")
-  .withThreshold(1.milli)
+    LogSpec.onSucceed(d => warn"Operation took ${d.render}")
+      .withThreshold(1.milli)
 
 // Will behave like logSpec1 and eventually log a warning as specified in logSpec2
 val logSpec3: LogSpec[Throwable, Int] = logSpec1 ++ logSpec2
