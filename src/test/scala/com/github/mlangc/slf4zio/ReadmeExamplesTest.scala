@@ -33,12 +33,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
             // ...
           }
           // ...
-          // Generate highly configurable performance logs with ease:
-          _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
+          _ <- logger.perfLogZIO(ZIO.sleep(10.millis))(
             // See below for more examples with `LogSpec`
-            LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
-              LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
-          }
+            LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}"))
         } yield ()
       }
 
@@ -62,15 +59,10 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
               logger.errorIO("Game over", new IllegalStateException("This is the end"))
             )
 
-            doEvenMoreStuff = ZIO.ifM(random.nextBoolean)(
-              ZIO.sleep(8.millis).as(42), ZIO.fail(new RuntimeException("That didn't work")))
-
-            // Generate highly configurable performance logs with ease:
-            _ <- doEvenMoreStuff.perfLog {
+            _ <- ZIO.sleep(8.millis).perfLog(
               // See below for more examples with `LogSpec`
-              LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}").withThreshold(5.millis) ++
-                LogSpec.onError[Throwable]((d, e) => error"Darn, failed again with $e after only ${d.render}")
-            }
+              LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
+                .withThreshold(5.millis))
           } yield ()
         }
       }

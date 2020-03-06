@@ -20,28 +20,28 @@ import zio.ZIO
 import zio.Task
 
 val effect: RIO[Clock, Unit] = {
-// ...
-class SomeClass
-// ...
-for {
-  logger <- makeLogger[SomeClass]
-  _ <- logger.debugIO("Debug me tender")
-  // ...
-  _ <- Task {
-    // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
-    // effectful code directly:
-    logger.info("Don't be shy")
     // ...
-    logger.warn("Please take me home")
+    class SomeClass
     // ...
-  }
-  // ...
-  // Generate highly configurable performance logs with ease:
-  _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
-    LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
-      LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
-  }
-} yield ()
+    for {
+      logger <- makeLogger[SomeClass]
+      _ <- logger.debugIO("Debug me tender")
+      // ...
+      _ <- Task {
+        // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
+        // effectful code directly:
+        logger.info("Don't be shy")
+        // ...
+        logger.warn("Please take me home")
+        // ...
+      }
+      // ...
+      // Generate highly configurable performance logs with ease:
+      _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
+        LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
+          LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
+      }
+    } yield ()
 }
 ```
 
@@ -118,6 +118,7 @@ ones, utilizing the underlying monoidial structure:
 
 ```scala
 import com.github.mlangc.slf4zio.api._
+
 // Simple specs can be combined using the `++` to obtain more complex specs
 val logSpec1: LogSpec[Throwable, Int] =
 LogSpec.onSucceed[Int]((d, a) => info"Succeeded after ${d.render} with $a") ++
