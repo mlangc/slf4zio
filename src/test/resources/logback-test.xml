@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
@@ -10,15 +9,28 @@
         </encoder>
     </appender>
 
-    <logger name="com.github.mlangc.slf4zio" level="info"/>
-    <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.debug" level="debug"/>
-    <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.info" level="info"/>
+    <appender name="TEST" class="com.github.mlangc.slf4zio.LogbackTestAppender"/>
 
     <logger name="com.github.mlangc.slf4zio" level="trace"/>
+
+    <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.debug" level="debug"/>
+    <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.info" level="info"/>
+    <logger name="com.github.mlangc.slf4zio.LoggingStrategiesBenchmark$.info" level="info"/>
+
+    <logger name="com.github.mlangc.slf4zio.api.LoggingSupportTest$" level="trace">
+        <appender-ref ref="TEST"/>
+    </logger>
+
+    <logger name="com.github.mlangc.slf4zio.api.LoggingServiceTest$" level="trace">
+        <appender-ref ref="TEST"/>
+    </logger>
+
+    <logger name="com.github.mlangc.slf4zio.api.RawPerfLogTest$" level="trace">
+        <appender-ref ref="TEST"/>
+    </logger>
 
     <root level="warn">
         <appender-ref ref="STDOUT"/>
     </root>
-
 
 </configuration>

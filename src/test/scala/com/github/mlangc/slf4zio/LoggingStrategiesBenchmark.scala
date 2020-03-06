@@ -6,11 +6,11 @@ import org.slf4j.LoggerFactory
 import org.scalameter.picklers.noPickler._
 import org.slf4j.Logger
 import org.slf4j.event.Level
-import zio.DefaultRuntime
+import zio.Runtime
 import zio.UIO
 import zio.ZIO
 
-object LoggingStrategiesBenchmark extends Bench.LocalTime with DefaultRuntime {
+object LoggingStrategiesBenchmark extends Bench.LocalTime {
   private implicit class LoggerOpsAnyVal(val logger: Logger) extends AnyVal {
     def debugAnyValIO(msg: => String): UIO[Unit] = UIO {
       if (logger.isDebugEnabled)
@@ -68,7 +68,7 @@ object LoggingStrategiesBenchmark extends Bench.LocalTime with DefaultRuntime {
     LoggerFactory.getLogger(getClass.getCanonicalName + "." + level.toString.toLowerCase)
 
   private def runNtimesIO(io: UIO[Unit])(n: Int): Unit = {
-    unsafeRun(nTimesIO(n)(io))
+    Runtime.default.unsafeRun(nTimesIO(n)(io))
   }
 
   private def nTimesIO[R, E](n: Int)(io: ZIO[R, E, Unit]): ZIO[R, E, Unit] = n match {

@@ -2,10 +2,11 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-version := "0.5.0-SNAPSHOT"
+scalaVersion := "2.13.1"
 
-scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.12.10", "2.11.12", "2.13.1")
+
+dynverSonatypeSnapshots in ThisBuild := true
 
 // See https://tpolecat.github.io/2017/04/25/scalac-flags.html
 val scala212Opts = Seq(
@@ -124,9 +125,18 @@ scalacOptions ++= {
 
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.28"
+val silencerVersion = "1.4.4"
+libraryDependencies ++= Seq(
+  compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+  "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+)
 
-val zioVersion = "1.0.0-RC17+6-daa6ab98"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30"
+
+resolvers +=
+  "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+
+val zioVersion = "1.0.0-RC18-1"
 libraryDependencies += "dev.zio" %% "zio" % zioVersion
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
@@ -147,15 +157,6 @@ licenses := Seq("APL2" -> url("http://www.apache.org/licenses/LICENSE-2.0.txt"))
 // Where is the source code hosted
 import xerial.sbt.Sonatype._
 sonatypeProjectHosting := Some(GitHubHosting("mlangc", "slf4zio", "m.langer798@gmail.com"))
-
-// or if you want to set these fields manually
-homepage := Some(url("https://github.com/mlangc/slf4zio"))
-scmInfo := Some(
-  ScmInfo(
-    url("https://github.com/mlangc/slf4zio.git"),
-    "scm:git@github.com:mlangc/slf4zio.git"
-  )
-)
 
 developers := List(
   Developer(id="mlangc", name="Matthias Langer", email="m.langer798@gmail.com", url=url("https://mlangc.wordpress.com/"))
