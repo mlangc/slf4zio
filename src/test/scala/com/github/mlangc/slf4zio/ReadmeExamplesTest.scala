@@ -1,7 +1,6 @@
 package com.github.mlangc.slf4zio
 
 import com.github.mlangc.slf4zio.api.Logging
-import zio.scheduler.Scheduler
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
@@ -54,8 +53,8 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
     },
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.Task
       import zio.RIO
+      import zio.Task
 
       val effect: RIO[Logging, Unit] = {
         for {
@@ -73,9 +72,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
     },
     testM("Performance Logging - Using the Logging Service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.duration.durationInt
       import zio.ZIO
       import zio.clock.Clock
+      import zio.duration.durationInt
 
       // Simple specs can be combined using the `++` to obtain more complex specs
       val logSpec1: LogSpec[Throwable, Int] =
@@ -98,7 +97,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         _ <- ZIO.sleep(3.milli).as(23).perfLogZ(logSpec3)
       } yield ()
 
-      assertM(effect.provideLayer(Logging.any ++ (Scheduler.live >>> Clock.live)))(isUnit)
+      assertM(effect.provideLayer(Logging.any ++ Clock.live))(isUnit)
     }
   ).provideLayer(Logging.forClass(getClass) ++ environment.TestEnvironment.any)
 }

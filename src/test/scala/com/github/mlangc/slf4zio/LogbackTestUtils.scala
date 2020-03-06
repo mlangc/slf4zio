@@ -9,7 +9,6 @@ import zio.ZIO
 import zio.clock.Clock
 import zio.duration.Duration
 import zio.duration.durationInt
-import zio.scheduler.Scheduler
 
 object LogbackTestUtils {
   def waitForLogbackInitialization: IO[LogbackInitializationTimeout, Unit] = {
@@ -19,7 +18,7 @@ object LogbackTestUtils {
     logbackInitialized.repeat(schedule).flatMap {
       case (true, _) => ZIO.unit
       case (false, elapsed) => ZIO.fail(LogbackInitializationTimeout(elapsed))
-    }.provideLayer(Scheduler.live >>> Clock.live)
+    }.provideLayer(Clock.live)
   }
 
   def logbackInitialized: UIO[Boolean] = UIO {

@@ -12,7 +12,6 @@ import zio.ZLayer
 import zio.clock
 import zio.clock.Clock
 import zio.duration.Duration
-import zio.scheduler.Scheduler
 
 import scala.reflect.ClassTag
 import scala.util.Failure
@@ -114,7 +113,7 @@ package object api {
     def perfLogIO[R, E, A](zio: ZIO[R, E, A])(spec: LogSpec[E, A]): ZIO[R, E, A] =
       ZIO.accessM[R] { r =>
         val io = zio.provide(r)
-        perfLogZIO(io)(spec).provideLayer(Scheduler.live >>> Clock.live)
+        perfLogZIO(io)(spec).provideLayer(Clock.live)
       }
 
     def perfLog[A](thunk: => A)(spec: LogSpec[Throwable, A]): A =
@@ -181,6 +180,8 @@ package object api {
 
       final def logIO(msg: => LogMessage): URIO[R, Unit] =
         withUnderlying(_.logIO(msg))
+
+      final def mdzio: MDZIO = MDZIO
 
       def logger: URIO[R, Logger]
 

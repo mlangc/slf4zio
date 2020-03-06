@@ -4,8 +4,6 @@ import com.github.ghik.silencer.silent
 import org.slf4j.Logger
 import zio.ZIO
 import zio.clock.Clock
-import zio.scheduler.Scheduler
-
 
 @silent("inferred to be `Any`")
 trait LoggingSupport { outer =>
@@ -17,7 +15,7 @@ trait LoggingSupport { outer =>
       ZIO.accessM[R] { r =>
         val io = zio.provide(r)
         io.perfLogZ(spec)
-          .provideLayer(Logging.forLogger(logger) ++ (Scheduler.live >>> Clock.live))
+          .provideLayer(Logging.forLogger(logger) ++ Clock.live)
       }
   }
 
