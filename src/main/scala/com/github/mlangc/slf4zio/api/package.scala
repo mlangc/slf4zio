@@ -6,6 +6,7 @@ import org.slf4j.event.Level
 import zio.Cause
 import zio.Has
 import zio.UIO
+import zio.ULayer
 import zio.URIO
 import zio.ZIO
 import zio.ZLayer
@@ -189,7 +190,7 @@ package object api {
         logger >>= op
     }
 
-    def forClass(clazz: Class[_]): ZLayer.NoDeps[Nothing, Logging] = ZLayer.succeed {
+    def forClass(clazz: Class[_]): ULayer[Logging] = ZLayer.succeed {
       new Service[Any] with Serializable {
         @transient
         private lazy val theLogger = getLogger(clazz)
@@ -198,13 +199,13 @@ package object api {
       }
     }
 
-    def forLogger(getLogger: => Logger): ZLayer.NoDeps[Nothing, Logging] = ZLayer.succeed {
+    def forLogger(getLogger: => Logger): ULayer[Logging] = ZLayer.succeed {
       new Service[Any] with Serializable {
         def logger: UIO[Logger] = UIO(getLogger)
       }
     }
 
-    def global: ZLayer.NoDeps[Nothing, Logging] = forClass(Logging.getClass)
+    def global: ULayer[Logging] = forClass(Logging.getClass)
 
     val any: ZLayer[Logging, Nothing, Logging] =
       ZLayer.requires[Logging]
