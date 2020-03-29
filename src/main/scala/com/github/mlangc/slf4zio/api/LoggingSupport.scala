@@ -11,7 +11,7 @@ trait LoggingSupport { outer =>
   protected final lazy val logger: Logger = getLogger(getClass)
 
   protected implicit final class ZioLoggerOps[R, E, A](zio: ZIO[R, E, A]) {
-    def perfLog(spec: LogSpec[E, A]): ZIO[R, E, A] =
+    def perfLog[E1 >: E](spec: LogSpec[E1, A]): ZIO[R, E, A] =
       ZIO.accessM[R] { r =>
         val io = zio.provide(r)
         io.perfLogZ(spec)

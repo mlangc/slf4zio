@@ -59,7 +59,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
               logger.errorIO("Game over", new IllegalStateException("This is the end"))
             )
 
-            _ <- ZIO.sleep(8.millis).perfLog(
+            _ <- ZIO.sleep(8.millis).as(23).perfLog(
               // See below for more examples with `LogSpec`
               LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
                 .withThreshold(5.millis)
