@@ -15,30 +15,35 @@ my personal preference:
 ### 1. Using the LoggingSupport Convenience Trait
 
 ````scala
-import com.github.mlangc.slf4zio.api._
-import zio.RIO
-import zio.ZIO
+import zio._
 import zio.random
 import zio.random.Random
 import zio.clock.Clock
 import zio.duration.durationInt
+import com.github.mlangc.slf4zio.api._
 
 object SomeObject extends LoggingSupport {
-    def doStuff: RIO[Random with Clock, Unit] = {
-      for {
-        _ <- logger.warnIO("What the heck")
-        _ <- ZIO.ifM(random.nextBoolean)(
-          logger.infoIO("Uff, that was close"),
-          logger.errorIO("Game over", new IllegalStateException("This is the end"))
-        )
+  def doStuff: RIO[Random with Clock, Unit] = {
+    for {
+      _ <- logger.warnIO("What the heck")
+      _ <- ZIO.ifM(random.nextBoolean)(
+        logger.infoIO("Uff, that was close"),
+        logger.errorIO("Game over", new IllegalStateException("This is the end"))
+      )
 
-        _ <- ZIO.sleep(8.millis).perfLog(
-          // See below for more examples with `LogSpec`
-          LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
-            .withThreshold(5.millis)
-          )
-      } yield ()
-    }
+      _ <- Task {
+        // logger is just a plain SLF4J logger; you can therefore use it from
+        // effectful code directly:
+        logger.trace("Wink wink nudge nudge")
+      }
+
+      _ <- ZIO.sleep(8.millis).as(23).perfLog(
+        // See below for more examples with `LogSpec`
+        LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
+          .withThreshold(5.millis)
+      )
+    } yield ()
+  }
 }
 ````
 

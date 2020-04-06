@@ -42,13 +42,12 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       assertM(live(effect))(isUnit)
     },
     testM("Using the convenience trait") {
-      import com.github.mlangc.slf4zio.api._
-      import zio.RIO
-      import zio.ZIO
+      import zio._
       import zio.random
       import zio.random.Random
       import zio.clock.Clock
       import zio.duration.durationInt
+      import com.github.mlangc.slf4zio.api._
 
       object SomeObject extends LoggingSupport {
         def doStuff: RIO[Random with Clock, Unit] = {
@@ -58,6 +57,12 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
               logger.infoIO("Uff, that was close"),
               logger.errorIO("Game over", new IllegalStateException("This is the end"))
             )
+
+            _ <- Task {
+              // logger is just a plain SLF4J logger; you can therefore use it from
+              // effectful code directly:
+              logger.trace("Wink wink nudge nudge")
+            }
 
             _ <- ZIO.sleep(8.millis).as(23).perfLog(
               // See below for more examples with `LogSpec`
