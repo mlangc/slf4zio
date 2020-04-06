@@ -1,73 +1,19 @@
 # SLF4ZIO
-*Integrates SLF4J with ZIO in a simple and unopinonated manner.*
+*Integrates SLF4J with ZIO in a simple manner.*
 
 [![Latest Release](https://img.shields.io/maven-central/v/com.github.mlangc/slf4zio_2.13?color=green&label=latest-release)](https://oss.sonatype.org/content/repositories/releases/com/github/mlangc/slf4zio_2.13)
 [![Latest Snapshot](https://img.shields.io/nexus/s/com.github.mlangc/slf4zio_2.13?label=latest-snapshot&server=https%3A%2F%2Foss.sonatype.org)](https://oss.sonatype.org/content/repositories/snapshots/com/github/mlangc/slf4zio_2.13/)
 
 ## When to Use
-If your code is based on [ZIO](https://zio.dev/) and you want to log with [SLF4J](https://www.slf4j.org/).
+If your code is based on [ZIO](https://zio.dev/) and you want to log with [SLF4J](https://www.slf4j.org/) without additional abstractions getting
+in your way.
 
 ## How to Use
-The library supports three different coding styles, that you can mix and match according to your needs:
+The library supports three different coding styles, that you can mix and match according to your needs. They are listed here in the order of
+my personal preference:
 
-### 1. Creating Loggers as Needed
-```scala
-import com.github.mlangc.slf4zio.api._
-import zio.duration.durationInt
-import zio.clock.Clock
-import zio.RIO
-import zio.ZIO
-import zio.Task
+### 1. Using the LoggingSupport Convenience Trait
 
-val effect: RIO[Clock, Unit] = {
-    // ...
-    class SomeClass
-    // ...
-    for {
-      logger <- makeLogger[SomeClass]
-      _ <- logger.debugIO("Debug me tender")
-      // ...
-      _ <- Task {
-        // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
-        // effectful code directly:
-        logger.info("Don't be shy")
-        // ...
-        logger.warn("Please take me home")
-        // ...
-      }
-      // ...
-      // Generate highly configurable performance logs with ease:
-      _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
-        LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
-          LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
-      }
-    } yield ()
-}
-```
-
-### 2. Using the Logging Service
-```scala
-import com.github.mlangc.slf4zio.api._
-import zio.RIO
-import zio.ZIO
-import zio.Task
-import zio.clock.Clock
-
-val effect: RIO[Logging with Clock, Unit] =
-for {
-  _ <- logging.warnIO("Surprise, surprise")
-  plainLogger <- logging.logger
-  _ <- Task {
-    plainLogger.debug("Shhh...")
-    plainLogger.warn("The devil always comes in disguise")
-  }
-  _ <- logging.traceIO("...")
-  getNumber = ZIO.succeed(42)
-  _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
-} yield ()
-```
-
-### 3. Using the LoggingSupport Convenience Trait
 ````scala
 import com.github.mlangc.slf4zio.api._
 import zio.RIO
@@ -107,6 +53,65 @@ another logger implementation though. For practical purposes, I would consider o
 logger to be a pure operation as soon as the logging framework has finished its initialization,
 and not care too much about this subtlety.
 
+### 2. Creating Loggers as Needed
+
+```scala
+import com.github.mlangc.slf4zio.api._
+import zio.duration.durationInt
+import zio.clock.Clock
+import zio.RIO
+import zio.ZIO
+import zio.Task
+
+val effect: RIO[Clock, Unit] = {
+    // ...
+    class SomeClass
+    // ...
+    for {
+      logger <- makeLogger[SomeClass]
+      _ <- logger.debugIO("Debug me tender")
+      // ...
+      _ <- Task {
+        // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
+        // effectful code directly:
+        logger.info("Don't be shy")
+        // ...
+        logger.warn("Please take me home")
+        // ...
+      }
+      // ...
+      // Generate highly configurable performance logs with ease:
+      _ <- logger.perfLogZIO(ZIO.sleep(10.millis)) {
+        LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}") ++
+          LogSpec.onTermination((d, c) => error"Woke up after ${d.render}: ${c.prettyPrint}")
+      }
+    } yield ()
+}
+```
+
+### 3. Using the Logging Service
+
+```scala
+import com.github.mlangc.slf4zio.api._
+import zio.RIO
+import zio.ZIO
+import zio.Task
+import zio.clock.Clock
+
+val effect: RIO[Logging with Clock, Unit] =
+for {
+  _ <- logging.warnIO("Surprise, surprise")
+  plainLogger <- logging.logger
+  _ <- Task {
+    plainLogger.debug("Shhh...")
+    plainLogger.warn("The devil always comes in disguise")
+  }
+  _ <- logging.traceIO("...")
+  getNumber = ZIO.succeed(42)
+  _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
+} yield ()
+```
+
 ### Performance Logging
 Apart from providing ZIO aware wrappers for [SLF4J](https://www.slf4j.org/), the library might also
 help you with performance related logging. The examples from above are meant to give you the overall
@@ -142,7 +147,7 @@ convenience APIs for interacting with `org.slf4j.MDC` that doesn't add any funct
 
 ## Alternatives
 If you want to track logging effects using the [ZIO Environment](http://degoes.net/articles/zio-environment) exclusively, consider using
-[zio-slf4j](https://github.com/NeQuissimus/zio-slf4j). If you are into Tagless Final,
+[zio-logging](https://github.com/zio/zio-logging). If you are into Tagless Final,
 take a look at [log4cats](https://github.com/ChristopherDavenport/log4cats).
 
 
