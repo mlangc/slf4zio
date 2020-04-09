@@ -47,6 +47,7 @@ object SomeObject extends LoggingSupport {
 }
 ````
 
+#### Side Note
 Note that the `logger` field in the `LoggingSupport` trait is lazy. Since the implicit class
 that implements the various `**IO` methods, like `debugIO`, `infoIO` and so forth, wraps the
 logger using a [by-name parameter](https://docs.scala-lang.org/tour/by-name-parameters.html),
