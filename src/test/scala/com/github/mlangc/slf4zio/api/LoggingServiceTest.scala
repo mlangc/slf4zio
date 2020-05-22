@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level
 import com.github.mlangc.slf4zio.LogbackTestAppender
 import com.github.mlangc.slf4zio.LogbackTestUtils
 import zio.ZIO
+import zio.clock.Clock
 import zio.duration._
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
@@ -20,7 +21,7 @@ object LoggingServiceTest extends DefaultRunnableSpec {
         }.withThreshold(1.second)
 
       def consume(d: Duration) =
-        TestClock.adjust(d) *> ZIO.sleep(d)
+        TestClock.adjust(d)
 
       def consumeAndFail(d: Duration) =
         consume(d) *> ZIO.fail(new RuntimeException("Test"))
@@ -45,6 +46,7 @@ object LoggingServiceTest extends DefaultRunnableSpec {
           assert(errEvts)(hasSize(equalTo(1)))
       }
     }
-  ).provideLayer(Logging.forClass(getClass) ++ (environment.Live.default >>> TestClock.default)) @@
-    TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
+  ).provideSomeLayer[TestClock with Clock](Logging.forClass(getClass)) @@
+    TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie) @@
+    TestAspect.timeout(15.seconds)
 }
