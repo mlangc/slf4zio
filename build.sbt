@@ -2,9 +2,9 @@ name := "slf4zio"
 
 organization := "com.github.mlangc"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.2"
 
-crossScalaVersions := Seq("2.12.10", "2.11.12", "2.13.1")
+crossScalaVersions := Seq("2.12.11", "2.11.12", "2.13.2")
 
 dynverSonatypeSnapshots in ThisBuild := true
 
@@ -125,7 +125,7 @@ scalacOptions ++= {
 
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
-val silencerVersion = "1.4.4"
+val silencerVersion = "1.7.0"
 libraryDependencies ++= Seq(
   compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
   "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
@@ -136,7 +136,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30"
 resolvers +=
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
-val zioVersion = "1.0.0-RC19-2"
+val zioVersion = "1.0.0-RC20"
 libraryDependencies += "dev.zio" %% "zio" % zioVersion
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
