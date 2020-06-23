@@ -136,7 +136,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30"
 resolvers +=
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
-val zioVersion = "1.0.0-RC20"
+val zioVersion = "1.0.0-RC21"
 libraryDependencies += "dev.zio" %% "zio" % zioVersion
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test
