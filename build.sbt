@@ -162,3 +162,5 @@ developers := List(
   Developer(id="mlangc", name="Matthias Langer", email="m.langer798@gmail.com", url=url("https://mlangc.wordpress.com/"))
 )
 
+Global / PgpKeys.gpgCommand := (baseDirectory.value / "gpg.sh").getAbsolutePath
+
