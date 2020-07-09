@@ -25,7 +25,9 @@ import com.github.mlangc.slf4zio.api._
 object SomeObject extends LoggingSupport {
   def doStuff: RIO[Random with Clock, Unit] = {
     for {
-      _ <- logger.warnIO("What the heck")
+      _ <- logger.warnIO("What the heck")  
+      marker <- makeMarker("[MARKER]")     
+      _ <- logger.debugIO(marker, "Wat?")
       _ <- ZIO.ifM(random.nextBoolean)(
         logger.infoIO("Uff, that was close"),
         logger.errorIO("Game over", new IllegalStateException("This is the end"))
@@ -74,7 +76,8 @@ val effect: RIO[Clock, Unit] = {
     class SomeClass
     // ...
     for {
-      logger <- makeLogger[SomeClass]
+      logger <- makeLogger[SomeClass] 
+      marker <- makeMarker("[MARKER]")
       _ <- logger.debugIO("Debug me tender")
       // ...
       _ <- Task {
@@ -83,6 +86,8 @@ val effect: RIO[Clock, Unit] = {
         logger.info("Don't be shy")
         // ...
         logger.warn("Please take me home")
+        // ...   
+        logger.info(marker, "Don't worry")
         // ...
       }
       // ...
@@ -106,13 +111,15 @@ import zio.clock.Clock
 
 val effect: RIO[Logging with Clock, Unit] =
 for {
-  _ <- logging.warnIO("Surprise, surprise")
+  _ <- logging.warnIO("Surprise, surprise") 
   plainLogger <- logging.logger
   _ <- Task {
     plainLogger.debug("Shhh...")
     plainLogger.warn("The devil always comes in disguise")
   }
-  _ <- logging.traceIO("...")
+  _ <- logging.traceIO("...")   
+  marker <- makeMarker("[MARKER]")
+  _ <- logging.debugIO(marker, "Here we are")
   getNumber = ZIO.succeed(42)
   _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
 } yield ()
