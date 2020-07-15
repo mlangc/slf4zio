@@ -1,7 +1,6 @@
 package com.github.mlangc.slf4zio
 
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory, Marker, MarkerFactory}
 import org.slf4j.event.Level
 import zio.Cause
 import zio.Has
@@ -58,7 +57,7 @@ package object api {
 
     def infoIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
       if (logger.isInfoEnabled)
-        logger.debug(msg, th)
+        logger.info(msg, th)
     }
 
     def warnIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
@@ -69,6 +68,56 @@ package object api {
     def errorIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
       if (logger.isErrorEnabled)
         logger.error(msg, th)
+    }
+
+    def traceIO(marker: Marker, msg: => String): UIO[Unit] = UIO {
+      if (logger.isTraceEnabled(marker))
+        logger.trace(marker, msg)
+    }
+
+    def debugIO(marker: Marker, msg: => String): UIO[Unit] = UIO {
+      if (logger.isDebugEnabled(marker))
+        logger.debug(marker, msg)
+    }
+
+    def infoIO(marker: Marker, msg: => String): UIO[Unit] = UIO {
+      if (logger.isInfoEnabled(marker))
+        logger.info(marker, msg)
+    }
+
+    def warnIO(marker: Marker, msg: => String): UIO[Unit] = UIO {
+      if (logger.isWarnEnabled(marker))
+        logger.warn(marker, msg)
+    }
+
+    def errorIO(marker: Marker, msg: => String): UIO[Unit] = UIO {
+      if (logger.isErrorEnabled(marker))
+        logger.error(marker, msg)
+    }
+
+    def traceIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
+      if (logger.isTraceEnabled(marker))
+        logger.trace(marker, msg, th)
+    }
+
+    def debugIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
+      if (logger.isDebugEnabled)
+        logger.debug(marker, msg, th)
+    }
+
+    def infoIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
+      if (logger.isInfoEnabled)
+        logger.info(marker, msg, th)
+    }
+
+    def warnIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
+      if (logger.isWarnEnabled)
+        logger.warn(marker, msg, th)
+    }
+
+    def errorIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
+      if (logger.isErrorEnabled)
+        logger.error(marker, msg, th)
     }
 
     def logIO(msg: LogMessage): UIO[Unit] =
@@ -179,6 +228,36 @@ package object api {
       final def errorIO(msg: => String, th: Throwable): URIO[R, Unit] =
         withUnderlying(_.errorIO(msg, th))
 
+      final def traceIO(marker: Marker, msg: => String): URIO[R, Unit] =
+        withUnderlying(_.traceIO(marker, msg))
+
+      final def debugIO(marker: Marker, msg: => String): URIO[R, Unit] =
+        withUnderlying(_.debugIO(marker, msg))
+
+      final def infoIO(marker: Marker, msg: => String): URIO[R, Unit] =
+        withUnderlying(_.infoIO(marker, msg))
+
+      final def warnIO(marker: Marker, msg: => String): URIO[R, Unit] =
+        withUnderlying(_.warnIO(marker, msg))
+
+      final def errorIO(marker: Marker, msg: => String): URIO[R, Unit] =
+        withUnderlying(_.errorIO(marker, msg))
+
+      final def traceIO(marker: Marker, msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.traceIO(marker, msg, th))
+
+      final def debugIO(marker: Marker, msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.debugIO(marker, msg, th))
+
+      final def infoIO(marker: Marker, msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.infoIO(marker, msg, th))
+
+      final def warnIO(marker: Marker, msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.warnIO(marker, msg, th))
+
+      final def errorIO(marker: Marker, msg: => String, th: Throwable): URIO[R, Unit] =
+        withUnderlying(_.errorIO(marker, msg, th))
+
       final def logIO(msg: => LogMessage): URIO[R, Unit] =
         withUnderlying(_.logIO(msg))
 
@@ -226,6 +305,9 @@ package object api {
 
   def getLogger(name: String): Logger =
     LoggerFactory.getLogger(name)
+
+  def getMarker(name: String): UIO[Marker] =
+    UIO(MarkerFactory.getMarker(name))
 
   def makeLogger(name: String): UIO[Logger] =
     UIO(getLogger(name))

@@ -126,6 +126,24 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       } yield ()
 
       assertM(effect.provideSomeLayer[Logging](Clock.live))(isUnit)
+    },
+    testM("Working with Markers") {
+      import com.github.mlangc.slf4zio.api._
+      import zio.{RIO, Task}
+      import zio.clock.Clock
+
+      val effect: RIO[Logging with Clock, Unit] =
+        for {
+          marker <- getMarker("[MARKER]")
+          _ <- logging.infoIO(marker, "Here we are")
+          logger <- logging.logger
+          _ <- logger.debugIO(marker, "Wat?")
+          _ <- Task {
+            logger.warn(marker, "Don't worry")
+          }
+        } yield ()
+
+      assertM(effect)(isUnit)
     }
   ).provideLayer(Logging.forClass(getClass) ++ environment.TestEnvironment.any)
 }
