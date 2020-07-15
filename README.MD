@@ -26,8 +26,6 @@ object SomeObject extends LoggingSupport {
   def doStuff: RIO[Random with Clock, Unit] = {
     for {
       _ <- logger.warnIO("What the heck")  
-      marker <- makeMarker("[MARKER]")     
-      _ <- logger.debugIO(marker, "Wat?")
       _ <- ZIO.ifM(random.nextBoolean)(
         logger.infoIO("Uff, that was close"),
         logger.errorIO("Game over", new IllegalStateException("This is the end"))
@@ -77,7 +75,6 @@ val effect: RIO[Clock, Unit] = {
     // ...
     for {
       logger <- makeLogger[SomeClass] 
-      marker <- makeMarker("[MARKER]")
       _ <- logger.debugIO("Debug me tender")
       // ...
       _ <- Task {
@@ -86,8 +83,6 @@ val effect: RIO[Clock, Unit] = {
         logger.info("Don't be shy")
         // ...
         logger.warn("Please take me home")
-        // ...   
-        logger.info(marker, "Don't worry")
         // ...
       }
       // ...
@@ -118,12 +113,29 @@ for {
     plainLogger.warn("The devil always comes in disguise")
   }
   _ <- logging.traceIO("...")   
-  marker <- makeMarker("[MARKER]")
-  _ <- logging.debugIO(marker, "Here we are")
   getNumber = ZIO.succeed(42)
   _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
 } yield ()
-```
+```      
+
+### Using Markers
+
+```scala
+import com.github.mlangc.slf4zio.api._
+import zio.{RIO, Task}
+import zio.clock.Clock
+
+val effect: RIO[Logging with Clock, Unit] =
+  for {
+    marker <- getMarker("[MARKER]")
+    _ <- logging.infoIO(marker, "Here we are")
+    logger <- logging.logger
+    _ <- logger.debugIO(marker, "Wat?")
+    _ <- Task {
+      logger.warn(marker, "Don't worry")
+    }
+  } yield ()
+```    
 
 ### Performance Logging
 Apart from providing ZIO aware wrappers for [SLF4J](https://www.slf4j.org/), the library might also
@@ -147,7 +159,7 @@ val logSpec2: LogSpec[Any, Any] =
 
 // Will behave like logSpec1 and eventually log a warning as specified in logSpec2
 val logSpec3: LogSpec[Throwable, Int] = logSpec1 ++ logSpec2
-```
+```     
 
 ### Using MDC convenience APIs
 SLF4ZIO also ships with a set of convenience APIs for `org.slf4j.MDC`. Note however, that traditional

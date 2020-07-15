@@ -22,7 +22,6 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         // ...
         for {
           logger <- makeLogger[SomeClass]
-          marker <- makeMarker("[MARKER]")
           _ <- logger.debugIO("Debug me tender")
           // ...
           _ <- Task {
@@ -31,8 +30,6 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
             logger.info("Don't be shy")
             // ...
             logger.warn("Please take me home")
-            // ...
-            logger.info(marker, "Don't worry")
             // ...
           }
           // ...
@@ -56,8 +53,6 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         def doStuff: RIO[Random with Clock, Unit] = {
           for {
             _ <- logger.warnIO("What the heck")
-            marker <- makeMarker("[MARKER]")
-            _ <- logger.debugIO(marker, "Wat?")
             _ <- ZIO.ifM(random.nextBoolean)(
               logger.infoIO("Uff, that was close"),
               logger.errorIO("Game over", new IllegalStateException("This is the end"))
@@ -96,8 +91,6 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
             plainLogger.warn("The devil always comes in disguise")
           }
           _ <- logging.traceIO("...")
-          marker <- makeMarker("[MARKER]")
-          _ <- logging.debugIO(marker, "Here we are")
           getNumber = ZIO.succeed(42)
           // See below for more examples with `LogSpec`
           _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
@@ -133,6 +126,24 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       } yield ()
 
       assertM(effect.provideSomeLayer[Logging](Clock.live))(isUnit)
+    },
+    testM("Working with Markers") {
+      import com.github.mlangc.slf4zio.api._
+      import zio.{RIO, Task}
+      import zio.clock.Clock
+
+      val effect: RIO[Logging with Clock, Unit] =
+        for {
+          marker <- getMarker("[MARKER]")
+          _ <- logging.infoIO(marker, "Here we are")
+          logger <- logging.logger
+          _ <- logger.debugIO(marker, "Wat?")
+          _ <- Task {
+            logger.warn(marker, "Don't worry")
+          }
+        } yield ()
+
+      assertM(effect)(isUnit)
     }
   ).provideLayer(Logging.forClass(getClass) ++ environment.TestEnvironment.any)
 }

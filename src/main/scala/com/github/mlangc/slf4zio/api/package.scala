@@ -57,7 +57,7 @@ package object api {
 
     def infoIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
       if (logger.isInfoEnabled)
-        logger.debug(msg, th)
+        logger.info(msg, th)
     }
 
     def warnIO(msg: => String, th: Throwable): UIO[Unit] = UIO {
@@ -107,7 +107,7 @@ package object api {
 
     def infoIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
       if (logger.isInfoEnabled)
-        logger.debug(marker, msg, th)
+        logger.info(marker, msg, th)
     }
 
     def warnIO(marker: Marker, msg: => String, th: Throwable): UIO[Unit] = UIO {
@@ -306,8 +306,8 @@ package object api {
   def getLogger(name: String): Logger =
     LoggerFactory.getLogger(name)
 
-  def getMarker(name: String): Marker =
-    MarkerFactory.getMarker(name)
+  def getMarker(name: String): UIO[Marker] =
+    UIO(MarkerFactory.getMarker(name))
 
   def makeLogger(name: String): UIO[Logger] =
     UIO(getLogger(name))
@@ -317,9 +317,6 @@ package object api {
 
   def makeLogger[T](clazz: Class[_]): UIO[Logger] =
     UIO(getLogger(clazz))
-
-  def makeMarker(name: String): UIO[Marker] =
-    UIO(getMarker(name))
 
   implicit final class LogMessageInterpolator(val stringContext: StringContext) extends AnyVal {
     def trace(args: Any*): LogMessage = {
