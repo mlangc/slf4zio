@@ -13,7 +13,7 @@ import zio.duration.durationInt
 object LogbackTestUtils {
   def waitForLogbackInitialization: IO[LogbackInitializationTimeout, Unit] = {
     val schedule: Schedule[Clock, Boolean, (Boolean, Duration)] =
-      (Schedule.doUntil[Boolean](identity) <* (Schedule.spaced(1.milli) <* Schedule.recurs(500))) && Schedule.elapsed
+      (Schedule.recurUntil[Boolean](identity) <* (Schedule.spaced(1.milli) <* Schedule.recurs(500))) && Schedule.elapsed
 
     logbackInitialized.repeat(schedule).flatMap {
       case (true, _) => ZIO.unit

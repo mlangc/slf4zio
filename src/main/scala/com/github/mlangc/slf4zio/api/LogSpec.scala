@@ -2,6 +2,7 @@ package com.github.mlangc.slf4zio.api
 
 import zio.Cause
 import zio.duration.Duration
+import zio.duration.DurationOps
 
 case class LogSpec[-E, -A](onError: List[(Duration, E) => LogMessage] = Nil,
                            onSucceed: List[(Duration, A) => LogMessage] = Nil,

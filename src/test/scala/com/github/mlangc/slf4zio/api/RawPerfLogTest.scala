@@ -4,6 +4,7 @@ import com.github.mlangc.slf4zio.LogbackTestAppender
 import com.github.mlangc.slf4zio.LogbackTestUtils
 import zio.Task
 import zio.duration.durationInt
+import zio.duration.DurationOps
 import zio.test.DefaultRunnableSpec
 import zio.test._
 

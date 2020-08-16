@@ -30,7 +30,6 @@ val scala212Opts = Seq(
   "-Xlint:inaccessible",               // Warn about inaccessible types in method signatures.
   "-Xlint:infer-any",                  // Warn when a type argument is inferred to be `Any`.
   "-Xlint:missing-interpolator",       // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-override",           // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Xlint:nullary-unit",               // Warn when nullary methods return Unit.
   "-Xlint:option-implicit",            // Option.apply used implicit view.
   "-Xlint:package-object-classes",     // Class or object defined in package object.
@@ -76,7 +75,6 @@ val scala213Opts = Seq(
   "-Xlint:inaccessible", // Warn about inaccessible types in method signatures.
   "-Xlint:infer-any", // Warn when a type argument is inferred to be `Any`.
   "-Xlint:missing-interpolator", // A string literal appears to be missing an interpolator id.
-  "-Xlint:nullary-override", // Warn when non-nullary `def f()' overrides nullary `def f'.
   "-Xlint:nullary-unit", // Warn when nullary methods return Unit.
   "-Xlint:option-implicit", // Option.apply used implicit view.
   "-Xlint:package-object-classes", // Class or object defined in package object.
@@ -136,7 +134,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.30"
 resolvers +=
   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
-val zioVersion = "1.0.0-RC21-2"
+val zioVersion = "1.0.0"
 libraryDependencies += "dev.zio" %% "zio" % zioVersion
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % Test
 libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.19" % Test

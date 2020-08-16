@@ -8,6 +8,7 @@ import com.github.mlangc.slf4zio.LogbackTestAppender
 import com.github.mlangc.slf4zio.LogbackTestUtils
 import zio.IO
 import zio.ZIO
+import zio.duration.DurationOps
 import zio.test.Assertion
 import zio.test.Assertion.equalTo
 import zio.test.Assertion.hasSize

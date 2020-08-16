@@ -1,6 +1,7 @@
 package com.github.mlangc.slf4zio
 
 import com.github.mlangc.slf4zio.api.Logging
+import zio.duration.DurationOps
 import zio.test.Assertion._
 import zio.test.DefaultRunnableSpec
 import zio.test._
@@ -10,11 +11,11 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
   def spec = suite("ReadmeExamplesTest")(
     testM("creating loggers as needed") {
       import com.github.mlangc.slf4zio.api._
-      import zio.duration.durationInt
-      import zio.clock.Clock
       import zio.RIO
-      import zio.ZIO
       import zio.Task
+      import zio.ZIO
+      import zio.clock.Clock
+      import zio.duration.durationInt
 
       val effect: RIO[Clock, Unit] = {
         // ...
@@ -42,12 +43,12 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       assertM(live(effect))(isUnit)
     },
     testM("Using the convenience trait") {
+      import com.github.mlangc.slf4zio.api._
       import zio._
-      import zio.random
-      import zio.random.Random
       import zio.clock.Clock
       import zio.duration.durationInt
-      import com.github.mlangc.slf4zio.api._
+      import zio.random
+      import zio.random.Random
 
       object SomeObject extends LoggingSupport {
         def doStuff: RIO[Random with Clock, Unit] = {
@@ -78,8 +79,8 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
     testM("Using the service") {
       import com.github.mlangc.slf4zio.api._
       import zio.RIO
-      import zio.ZIO
       import zio.Task
+      import zio.ZIO
       import zio.clock.Clock
 
       val effect: RIO[Logging with Clock, Unit] =
@@ -129,8 +130,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
     },
     testM("Working with Markers") {
       import com.github.mlangc.slf4zio.api._
-      import zio.{RIO, Task}
       import zio.clock.Clock
+      import zio.RIO
+      import zio.Task
 
       val effect: RIO[Logging with Clock, Unit] =
         for {
