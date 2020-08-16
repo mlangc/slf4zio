@@ -4,7 +4,7 @@ organization := "com.github.mlangc"
 
 scalaVersion := "2.13.3"
 
-crossScalaVersions := Seq("2.12.11", "2.11.12", "2.13.3")
+crossScalaVersions := Seq("2.12.12", "2.11.12", "2.13.3")
 
 dynverSonatypeSnapshots in ThisBuild := true
 
@@ -123,7 +123,7 @@ scalacOptions ++= {
 
 scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
-val silencerVersion = "1.7.0"
+val silencerVersion = "1.7.1"
 libraryDependencies ++= Seq(
   compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
   "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
