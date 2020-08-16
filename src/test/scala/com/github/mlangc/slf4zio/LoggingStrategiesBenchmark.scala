@@ -2,9 +2,9 @@ package com.github.mlangc.slf4zio
 
 import org.scalameter.Bench
 import org.scalameter.Gen
-import org.slf4j.LoggerFactory
 import org.scalameter.picklers.noPickler._
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import zio.Runtime
 import zio.UIO

@@ -1,11 +1,11 @@
 package com.github.mlangc.slf4zio.api
 
+import scala.collection.JavaConverters._
+
 import com.github.ghik.silencer.silent
 import org.slf4j.MDC
 import zio.UIO
 import zio.ZIO
-
-import scala.collection.JavaConverters._
 
 /**
  * Convenience APIs for interacting with the MDC context.

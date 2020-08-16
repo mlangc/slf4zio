@@ -130,9 +130,9 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
     },
     testM("Working with Markers") {
       import com.github.mlangc.slf4zio.api._
-      import zio.clock.Clock
       import zio.RIO
       import zio.Task
+      import zio.clock.Clock
 
       val effect: RIO[Logging with Clock, Unit] =
         for {
