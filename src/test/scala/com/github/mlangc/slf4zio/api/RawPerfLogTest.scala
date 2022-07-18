@@ -1,16 +1,12 @@
 package com.github.mlangc.slf4zio.api
 
-import com.github.mlangc.slf4zio.LogbackTestAppender
-import com.github.mlangc.slf4zio.LogbackTestUtils
-import zio.Task
-import zio.duration.DurationOps
-import zio.duration.durationInt
-import zio.test.DefaultRunnableSpec
-import zio.test._
+import com.github.mlangc.slf4zio.{LogbackTestAppender, LogbackTestUtils}
+import zio.test.{ZIOSpecDefault, _}
+import zio.{ZIO, duration2DurationOps, durationInt}
 
-object RawPerfLogTest extends DefaultRunnableSpec {
+object RawPerfLogTest extends ZIOSpecDefault {
   def spec = suite("Raw Performance Log")(
-    testM("Simple Examples") {
+    test("Simple Examples") {
       val spec1 =
         LogSpec.onSucceed[String]((d, s) => info"Good: (${d.render}, $s)") ++
           LogSpec.onError[Throwable]((d, e) => error"Not good: (${d.render}, $e)") ++
@@ -24,12 +20,12 @@ object RawPerfLogTest extends DefaultRunnableSpec {
 
       for {
         logger <- makeLogger(getClass)
-        _ <- Task(logger.perfLog(ok)(spec1))
-        _ <- Task(logger.perfLog[String](throw new RuntimeException(error))(spec1)).ignore
-        _ <- Task(logger.perfLog(ok)(spec2))
-        _ <- Task(logger.perfLog[String](throw new RuntimeException(error))(spec2)).ignore
+        _ <- ZIO.attempt(logger.perfLog(ok)(spec1))
+        _ <- ZIO.attempt(logger.perfLog[String](throw new RuntimeException(error))(spec1)).ignore
+        _ <- ZIO.attempt(logger.perfLog(ok)(spec2))
+        _ <- ZIO.attempt(logger.perfLog[String](throw new RuntimeException(error))(spec2)).ignore
         evts <- LogbackTestAppender.eventsFor(this.getClass)
       } yield assert(evts)(Assertion.hasSize(Assertion.equalTo(2)))
     }
-  ) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
+  ) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie) @@ TestAspect.withLiveClock
 }

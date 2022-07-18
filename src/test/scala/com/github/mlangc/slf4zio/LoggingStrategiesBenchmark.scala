@@ -6,20 +6,18 @@ import org.scalameter.picklers.noPickler._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
-import zio.Runtime
-import zio.UIO
-import zio.ZIO
+import zio.{Runtime, UIO, Unsafe, ZIO}
 
 object LoggingStrategiesBenchmark extends Bench.LocalTime {
   private implicit class LoggerOpsAnyVal(val logger: Logger) extends AnyVal {
-    def debugAnyValIO(msg: => String): UIO[Unit] = UIO {
+    def debugAnyValIO(msg: => String): UIO[Unit] = ZIO.succeed {
       if (logger.isDebugEnabled)
         logger.debug(msg)
     }
   }
 
   private implicit class LoggerOpsLazy(logger: => Logger) {
-    def debugLazyIO(msg: => String): UIO[Unit] = UIO {
+    def debugLazyIO(msg: => String): UIO[Unit] = ZIO.succeed {
       if (logger.isDebugEnabled)
         logger.debug(msg)
     }
@@ -67,9 +65,8 @@ object LoggingStrategiesBenchmark extends Bench.LocalTime {
   private def getLogger(level: Level): Logger =
     LoggerFactory.getLogger(getClass.getCanonicalName + "." + level.toString.toLowerCase)
 
-  private def runNtimesIO(io: UIO[Unit])(n: Int): Unit = {
-    Runtime.default.unsafeRun(nTimesIO(n)(io))
-  }
+  private def runNtimesIO(io: UIO[Unit])(n: Int): Unit =
+    Unsafe.unsafe(implicit u => Runtime.default.unsafe.run(nTimesIO(n)(io)).getOrThrowFiberFailure())
 
   private def nTimesIO[R, E](n: Int)(io: ZIO[R, E, Unit]): ZIO[R, E, Unit] = n match {
     case 1 => io

@@ -1,19 +1,14 @@
 package com.github.mlangc.slf4zio.api
 
 import ch.qos.logback.classic.Level
-import com.github.mlangc.slf4zio.LogbackTestAppender
-import com.github.mlangc.slf4zio.LogbackTestUtils
-import zio.ZIO
-import zio.clock.Clock
-import zio.duration._
+import com.github.mlangc.slf4zio.{LogbackTestAppender, LogbackTestUtils}
+import zio.{ZIO, _}
 import zio.test.Assertion._
-import zio.test.DefaultRunnableSpec
 import zio.test._
-import zio.test.environment.TestClock
 
-object LoggingServiceTest extends DefaultRunnableSpec {
+object LoggingServiceTest extends ZIOSpecDefault {
   def spec = suite("LoggingService")(
-    testM("Logging with thresholds") {
+    test("Logging with thresholds") {
       val spec = {
         LogSpec.onError(_ => warn"ERROR") ++
           LogSpec.onSucceed(_ => info"OK") ++
@@ -29,7 +24,7 @@ object LoggingServiceTest extends DefaultRunnableSpec {
       def consumeAndDie(d: Duration) =
         consume(d) *> ZIO.dieMessage("Test")
 
-      for {
+      (for {
         _ <- consume(1.milli).perfLogZ(spec)
         _ <- consume(1.second).perfLogZ(spec)
         _ <- consumeAndFail(999.millis + 999.micros + 999.nanos).perfLogZ(spec).ignore
@@ -44,9 +39,9 @@ object LoggingServiceTest extends DefaultRunnableSpec {
         assert(warnEvts)(hasSize(equalTo(1))) &&
           assert(infoEvts)(hasSize(equalTo(1))) &&
           assert(errEvts)(hasSize(equalTo(1)))
-      }
+      })
     }
-  ).provideSomeLayer[TestClock with Clock](Logging.forClass(getClass)) @@
-    TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie) @@
+  ).provideCustomLayer((Logging.forClass(getClass))) @@
+    TestAspect.before(live(LogbackTestUtils.waitForLogbackInitialization.orDie)) @@
     TestAspect.timeout(15.seconds)
 }

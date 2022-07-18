@@ -1,23 +1,17 @@
 package com.github.mlangc.slf4zio
 
 import com.github.mlangc.slf4zio.api.Logging
-import zio.duration.DurationOps
 import zio.test.Assertion._
-import zio.test.DefaultRunnableSpec
-import zio.test._
-import zio.test.environment.live
+import zio.test.{TestAspect, ZIOSpecDefault, _}
+import zio.{Task, ZIO, duration2DurationOps}
 
-object ReadmeExamplesTest extends DefaultRunnableSpec {
+object ReadmeExamplesTest extends ZIOSpecDefault {
   def spec = suite("ReadmeExamplesTest")(
-    testM("creating loggers as needed") {
+    test("creating loggers as needed") {
       import com.github.mlangc.slf4zio.api._
-      import zio.RIO
-      import zio.Task
-      import zio.ZIO
-      import zio.clock.Clock
-      import zio.duration.durationInt
+      import zio.{ZIO, durationInt}
 
-      val effect: RIO[Clock, Unit] = {
+      val effect: Task[Unit] = {
         // ...
         class SomeClass
         // ...
@@ -25,7 +19,7 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
           logger <- makeLogger[SomeClass]
           _ <- logger.debugIO("Debug me tender")
           // ...
-          _ <- Task {
+          _ <- ZIO.attempt {
             // Note that makeLogger just returns a plain SLF4J logger; you can therefore use it from
             // effectful code directly:
             logger.info("Don't be shy")
@@ -40,26 +34,22 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         } yield ()
       }
 
-      assertM(live(effect))(isUnit)
+      assertZIO(effect)(isUnit)
     },
-    testM("Using the convenience trait") {
+    test("Using the convenience trait") {
       import com.github.mlangc.slf4zio.api._
-      import zio._
-      import zio.clock.Clock
-      import zio.duration.durationInt
-      import zio.random
-      import zio.random.Random
+      import zio.{Random, ZIO, durationInt}
 
       object SomeObject extends LoggingSupport {
-        def doStuff: RIO[Random with Clock, Unit] = {
+        def doStuff: Task[Unit] = {
           for {
             _ <- logger.warnIO("What the heck")
-            _ <- ZIO.ifM(random.nextBoolean)(
+            _ <- ZIO.ifZIO(Random.nextBoolean)(
               logger.infoIO("Uff, that was close"),
               logger.errorIO("Game over", new IllegalStateException("This is the end"))
             )
 
-            _ <- Task {
+            _ <- ZIO.attempt {
               // logger is just a plain SLF4J logger; you can therefore use it from
               // effectful code directly:
               logger.trace("Wink wink nudge nudge")
@@ -74,20 +64,17 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
         }
       }
 
-      assertM(live(SomeObject.doStuff.ignore))(isUnit)
+      assertZIO(SomeObject.doStuff.ignore)(isUnit)
     },
-    testM("Using the service") {
+    test("Using the service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.RIO
-      import zio.Task
-      import zio.ZIO
-      import zio.clock.Clock
+      import zio.{RIO, ZIO}
 
-      val effect: RIO[Logging with Clock, Unit] =
+      val effect: RIO[Logging, Unit] =
         for {
           _ <- logging.warnIO("Surprise, surprise")
           plainLogger <- logging.logger
-          _ <- Task {
+          _ <- ZIO.attempt {
             plainLogger.debug("Shhh...")
             plainLogger.warn("The devil always comes in disguise")
           }
@@ -97,13 +84,11 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
           _ <- getNumber.perfLogZ(LogSpec.onSucceed(d => debug"Got number after ${d.render}"))
         } yield ()
 
-      assertM(effect)(isUnit)
+      assertZIO(effect)(isUnit)
     },
-    testM("Performance Logging - Using the Logging Service") {
+    test("Performance Logging - Using the Logging Service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.ZIO
-      import zio.clock.Clock
-      import zio.duration.durationInt
+      import zio.{ZIO, durationInt}
 
       // Simple specs can be combined using the `++` to obtain more complex specs
       val logSpec1: LogSpec[Throwable, Int] =
@@ -119,33 +104,31 @@ object ReadmeExamplesTest extends DefaultRunnableSpec {
       // Will behave like logSpec1 and eventually log a warning as specified in logSpec2
       val logSpec3: LogSpec[Throwable, Int] = logSpec1 ++ logSpec2
 
-      val effect: ZIO[Clock with Logging, Nothing, Unit] = for {
+      val effect: ZIO[Logging, Nothing, Unit] = for {
         _ <- ZIO.sleep(5.micros).perfLogZ(LogSpec.onSucceed(d => debug"Done after ${d.render}"))
         _ <- ZIO.sleep(1.milli).as(42).perfLogZ(logSpec1)
         _ <- ZIO.sleep(2.milli).perfLogZ(logSpec2)
         _ <- ZIO.sleep(3.milli).as(23).perfLogZ(logSpec3)
       } yield ()
 
-      assertM(effect.provideSomeLayer[Logging](Clock.live))(isUnit)
+      assertZIO(effect)(isUnit)
     },
-    testM("Working with Markers") {
+    test("Working with Markers") {
       import com.github.mlangc.slf4zio.api._
       import zio.RIO
-      import zio.Task
-      import zio.clock.Clock
 
-      val effect: RIO[Logging with Clock, Unit] =
+      val effect: RIO[Logging, Unit] =
         for {
           marker <- getMarker("[MARKER]")
           _ <- logging.infoIO(marker, "Here we are")
           logger <- logging.logger
           _ <- logger.debugIO(marker, "Wat?")
-          _ <- Task {
+          _ <- ZIO.attempt {
             logger.warn(marker, "Don't worry")
           }
         } yield ()
 
-      assertM(effect)(isUnit)
+      assertZIO(effect)(isUnit)
     }
-  ).provideLayer(Logging.forClass(getClass) ++ environment.TestEnvironment.any)
+  ).provideCustomLayer(Logging.forClass(getClass)) @@ TestAspect.withLiveClock
 }
