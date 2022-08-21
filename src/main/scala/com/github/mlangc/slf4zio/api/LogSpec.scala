@@ -1,6 +1,7 @@
 package com.github.mlangc.slf4zio.api
 
-import zio.{Cause, Duration}
+import zio.Cause
+import zio.Duration
 import zio.duration2DurationOps
 
 case class LogSpec[-E, -A](onError: List[(Duration, E) => LogMessage] = Nil,

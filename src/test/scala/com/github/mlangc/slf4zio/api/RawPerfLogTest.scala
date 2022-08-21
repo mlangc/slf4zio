@@ -1,8 +1,11 @@
 package com.github.mlangc.slf4zio.api
 
-import com.github.mlangc.slf4zio.{LogbackTestAppender, LogbackTestUtils}
-import zio.test.{ZIOSpecDefault, _}
-import zio.{ZIO, duration2DurationOps, durationInt}
+import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.LogbackTestUtils
+import zio.test._
+import zio.ZIO
+import zio.duration2DurationOps
+import zio.durationInt
 
 object RawPerfLogTest extends ZIOSpecDefault {
   def spec = suite("Raw Performance Log")(

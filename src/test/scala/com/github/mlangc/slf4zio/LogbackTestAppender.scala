@@ -4,7 +4,8 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.function.UnaryOperator
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import zio.{UIO, ZIO}
+import zio.UIO
+import zio.ZIO
 
 class LogbackTestAppender extends AppenderBase[ILoggingEvent] {
   def append(eventObject: ILoggingEvent): Unit = {

@@ -1,11 +1,23 @@
 package com.github.mlangc.slf4zio
 
-import org.slf4j.{Logger, LoggerFactory, Marker, MarkerFactory}
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.slf4j.Marker
+import org.slf4j.MarkerFactory
 import org.slf4j.event.Level
-import zio.{Cause, Clock, Duration, UIO, ULayer, URIO, ZIO, ZLayer}
+import zio.Cause
+import zio.Clock
+import zio.Duration
+import zio.UIO
+import zio.ULayer
+import zio.URIO
+import zio.ZIO
+import zio.ZLayer
 
 import scala.reflect.ClassTag
-import scala.util.{Failure, Success, Try}
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 
 package object api {
   implicit final class Slf4jLoggerOps(logger: => Logger) {
