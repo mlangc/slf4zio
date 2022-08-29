@@ -1,10 +1,8 @@
 package com.github.mlangc.slf4zio.api
 
-import com.github.ghik.silencer.silent
 import org.slf4j.Logger
 import zio.ZIO
 
-@silent("inferred to be `Any`")
 trait LoggingSupport { outer =>
   @transient
   protected final lazy val logger: Logger = getLogger(getClass)
