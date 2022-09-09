@@ -19,25 +19,25 @@ import zio.ZIO
 @silent("JavaConverters")
 abstract class MDZIO {
   final def put(key: String, value: String): UIO[Unit] =
-    UIO(MDC.put(key, value))
+    ZIO.succeed(MDC.put(key, value))
 
   final def get(key: String): UIO[Option[String]] =
-    UIO(Option(MDC.get(key)))
+    ZIO.succeed(Option(MDC.get(key)))
 
   final def remove(key: String): UIO[Unit] =
-    UIO(MDC.remove(key))
+    ZIO.succeed(MDC.remove(key))
 
   final def clear(): UIO[Unit] =
-    UIO(MDC.clear())
+    ZIO.succeed(MDC.clear())
 
   final def putAll(pairs: (String, String)*): UIO[Unit] =
     putAll(pairs)
 
   final def putAll(pairs: Iterable[(String, String)]): UIO[Unit] =
-    ZIO.foreach_(pairs)((put _).tupled)
+    ZIO.foreachDiscard(pairs)((put _).tupled)
 
   final def removeAll(keys: Iterable[String]): UIO[Unit] =
-    ZIO.foreach_(keys)(remove)
+    ZIO.foreachDiscard(keys)(remove)
 
   /**
    * Puts the given key value pairs in the context, executes the given action, and restores the original context.
@@ -55,10 +55,10 @@ abstract class MDZIO {
     doWith(pairs)(zio)
 
   final def getContextMap: UIO[Option[Map[String, String]]] =
-    UIO(Option(MDC.getCopyOfContextMap).map(_.asScala.toMap))
+    ZIO.succeed(Option(MDC.getCopyOfContextMap).map(_.asScala.toMap))
 
   final def setContextMap(map: Map[String, String]): UIO[Unit] =
-    UIO(MDC.setContextMap(map.asJava))
+    ZIO.succeed(MDC.setContextMap(map.asJava))
 
   private def getAll(keys: Iterable[String]): UIO[Map[String, String]] =
     ZIO.foldLeft(keys)(Map.empty[String, String]) { (acc, key) =>

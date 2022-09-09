@@ -3,22 +3,15 @@ package com.github.mlangc.slf4zio.api
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
-import com.github.mlangc.slf4zio.LogbackInitializationTimeout
-import com.github.mlangc.slf4zio.LogbackTestAppender
-import com.github.mlangc.slf4zio.LogbackTestUtils
-import zio.IO
-import zio.ZIO
-import zio.duration.DurationOps
-import zio.test.Assertion
-import zio.test.Assertion.equalTo
-import zio.test.Assertion.hasSize
-import zio.test.DefaultRunnableSpec
-import zio.test._
+import com.github.mlangc.slf4zio.{LogbackInitializationTimeout, LogbackTestAppender, LogbackTestUtils}
+import zio.test.Assertion.{equalTo, hasSize}
+import zio.test.{Assertion, ZIOSpecDefault, _}
+import zio.{IO, ZIO, duration2DurationOps}
 
 
-object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
+object LoggingSupportTest extends ZIOSpecDefault with LoggingSupport {
   def spec = suite("LoggingSupport")(
-    testM("Make sure something is logged") {
+    test("Make sure something is logged") {
       for {
         _ <- logger.infoIO("Test")
         evts <- getLogEvents
@@ -26,14 +19,14 @@ object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
     },
     suite("Performance logging")(
       suite("ZIO syntax")(
-        testM("Success only") {
+        test("Success only") {
           for {
             _ <- ZIO.unit.perfLog(LogSpec.onSucceed(d => debug"Simple ${d.render}"))
             _ <- ZIO.succeed(42).perfLog(LogSpec.onSucceed((d, a) => debug"Simple (${d.render}, $a)"))
             evts <- getLogEvents(_.getMessage.startsWith("Simple"))
           } yield assert(evts.size)(equalTo(2))
         },
-        testM("Success and failures") {
+        test("Success and failures") {
           val spec: LogSpec[Throwable, Any] = LogSpec.onSucceed(d => info"Success after ${d.render}") ++
             LogSpec.onError[Throwable]((d, e) => warn"Error $e after ${d.render}") ++
             LogSpec.onTermination((d, c) => error"Fatal error ${c.prettyPrint} after ${d.render}")
@@ -53,7 +46,7 @@ object LoggingSupportTest extends DefaultRunnableSpec with LoggingSupport {
         }
       )
     )
-  ) @@ TestAspect.before(LogbackTestUtils.waitForLogbackInitialization.orDie)
+  ) @@ TestAspect.before(live(LogbackTestUtils.waitForLogbackInitialization).orDie)
 
   private def getLogEvents(p: ILoggingEvent => Boolean): IO[LogbackInitializationTimeout, List[ILoggingEvent]] =
     LogbackTestAppender.events.map { evts =>

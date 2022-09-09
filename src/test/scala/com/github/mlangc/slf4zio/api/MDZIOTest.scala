@@ -3,12 +3,12 @@ package com.github.mlangc.slf4zio.api
 import zio.ZIO
 import zio.test.Assertion.equalTo
 import zio.test.Assertion.isNone
-import zio.test.DefaultRunnableSpec
 import zio.test._
+import zio.test.ZIOSpecDefault
 
-object MDZIOTest extends DefaultRunnableSpec {
+object MDZIOTest extends ZIOSpecDefault {
   def spec = suite("MDZIO")(
-    testM("put, get & clear works properly") {
+    test("put, get & clear works properly") {
       val (x, y) = ("x", "y")
       val (a, b) = ("a", "b")
 
@@ -21,7 +21,7 @@ object MDZIOTest extends DefaultRunnableSpec {
         v4 <- MDZIO.get(y)
       } yield assert((v1, v2, v3, v4))(equalTo((Some(a), Some(b), None, None)))
     },
-    testM("doWith") {
+    test("doWith") {
       val (d, e, f, g) = ("d", "e", "f", "g")
       val (k, l, m, n) = ("k", "l", "m", "n")
       val m0 = "m0"
@@ -35,7 +35,7 @@ object MDZIOTest extends DefaultRunnableSpec {
         v2 <- ZIO.foreach(defg)(MDZIO.get)
       } yield assert(v1.flatten)(equalTo(klmn)) && assert(v2.flatten)(equalTo(km0))
     },
-    testM("setContextMap") {
+    test("setContextMap") {
       val (r, s) = ("r", "s")
 
       for {
