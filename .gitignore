@@ -6,3 +6,4 @@ project/.sbt
 .vscode/
 metals.sbt
 .metals/
+.bsp/

@@ -6,7 +6,7 @@ scalaVersion := "2.13.3"
 
 crossScalaVersions := Seq("2.12.12", "2.11.12", "2.13.3")
 
-dynverSonatypeSnapshots in ThisBuild := true
+ThisBuild / dynverSonatypeSnapshots := true
 
 // See https://tpolecat.github.io/2017/04/25/scalac-flags.html
 val scala212Opts = Seq(
@@ -118,7 +118,7 @@ scalacOptions ++= {
   else scala213Opts
 }
 
-scalacOptions in (Compile, console) --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
+Compile / console / scalacOptions --= Seq("-Ywarn-unused:imports", "-Xfatal-warnings")
 
 val silencerVersion = "1.7.1"
 libraryDependencies ++= Seq(
