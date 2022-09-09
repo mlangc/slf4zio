@@ -2,3 +2,7 @@ target
 .sbtopts
 project/.sbt
 .idea
+.bloop/
+.vscode/
+metals.sbt
+.metals/
