@@ -1,12 +1,15 @@
 package com.github.mlangc.slf4zio
 
+import org.scalameter.picklers.noPickler._
 import org.scalameter.Bench
 import org.scalameter.Gen
-import org.scalameter.picklers.noPickler._
+import org.slf4j.event.Level
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.slf4j.event.Level
-import zio.{Runtime, UIO, Unsafe, ZIO}
+import zio.Runtime
+import zio.UIO
+import zio.Unsafe
+import zio.ZIO
 
 object LoggingStrategiesBenchmark extends Bench.LocalTime {
   private implicit class LoggerOpsAnyVal(val logger: Logger) extends AnyVal {

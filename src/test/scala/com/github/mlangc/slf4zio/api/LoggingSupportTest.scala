@@ -1,13 +1,18 @@
 package com.github.mlangc.slf4zio.api
 
-
-import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
-import com.github.mlangc.slf4zio.{LogbackInitializationTimeout, LogbackTestAppender, LogbackTestUtils}
-import zio.test.Assertion.{equalTo, hasSize}
-import zio.test.{Assertion, ZIOSpecDefault, _}
-import zio.{IO, ZIO, duration2DurationOps}
-
+import ch.qos.logback.classic.Level
+import com.github.mlangc.slf4zio.LogbackInitializationTimeout
+import com.github.mlangc.slf4zio.LogbackTestAppender
+import com.github.mlangc.slf4zio.LogbackTestUtils
+import zio.duration2DurationOps
+import zio.test._
+import zio.test.Assertion
+import zio.test.Assertion.equalTo
+import zio.test.Assertion.hasSize
+import zio.test.ZIOSpecDefault
+import zio.IO
+import zio.ZIO
 
 object LoggingSupportTest extends ZIOSpecDefault with LoggingSupport {
   def spec = suite("LoggingSupport")(
@@ -40,8 +45,8 @@ object LoggingSupportTest extends ZIOSpecDefault with LoggingSupport {
             termEvents <- getLogEvents(evt => evt.getLevel == Level.ERROR && evt.getMessage.startsWith("Fatal"))
           } yield {
             assert(succEvents)(hasSize(equalTo(1))) &&
-              assert(errEvents)(hasSize(equalTo(1))) &&
-              assert(termEvents)(hasSize(equalTo(1)))
+            assert(errEvents)(hasSize(equalTo(1))) &&
+            assert(termEvents)(hasSize(equalTo(1)))
           }
         }
       )

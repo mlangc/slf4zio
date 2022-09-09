@@ -2,7 +2,12 @@ package com.github.mlangc.slf4zio
 
 import ch.qos.logback.classic.LoggerContext
 import org.slf4j.LoggerFactory
-import zio.{Duration, IO, Schedule, UIO, ZIO, durationInt}
+import zio.durationInt
+import zio.Duration
+import zio.IO
+import zio.Schedule
+import zio.UIO
+import zio.ZIO
 
 object LogbackTestUtils {
   def waitForLogbackInitialization: IO[LogbackInitializationTimeout, Unit] = {

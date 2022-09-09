@@ -1,12 +1,14 @@
 package com.github.mlangc.slf4zio.api
 
+import zio.duration2DurationOps
 import zio.Cause
 import zio.Duration
-import zio.duration2DurationOps
 
-case class LogSpec[-E, -A](onError: List[(Duration, E) => LogMessage] = Nil,
-                           onSucceed: List[(Duration, A) => LogMessage] = Nil,
-                           onTermination: List[(Duration, Cause[Nothing]) => LogMessage] = Nil) {
+case class LogSpec[-E, -A](
+    onError: List[(Duration, E) => LogMessage] = Nil,
+    onSucceed: List[(Duration, A) => LogMessage] = Nil,
+    onTermination: List[(Duration, Cause[Nothing]) => LogMessage] = Nil
+) {
 
   def combine[E2 <: E, A2 <: A](other: LogSpec[E2, A2]): LogSpec[E2, A2] =
     LogSpec(

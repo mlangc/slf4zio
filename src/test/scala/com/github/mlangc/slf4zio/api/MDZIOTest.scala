@@ -1,10 +1,10 @@
 package com.github.mlangc.slf4zio.api
 
-import zio.ZIO
+import zio.test._
 import zio.test.Assertion.equalTo
 import zio.test.Assertion.isNone
-import zio.test._
 import zio.test.ZIOSpecDefault
+import zio.ZIO
 
 object MDZIOTest extends ZIOSpecDefault {
   def spec = suite("MDZIO")(

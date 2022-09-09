@@ -1,10 +1,14 @@
 package com.github.mlangc.slf4zio
 
+import org.slf4j.event.Level
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
-import org.slf4j.event.Level
+import scala.reflect.ClassTag
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
 import zio.Cause
 import zio.Clock
 import zio.Duration
@@ -13,11 +17,6 @@ import zio.ULayer
 import zio.URIO
 import zio.ZIO
 import zio.ZLayer
-
-import scala.reflect.ClassTag
-import scala.util.Failure
-import scala.util.Success
-import scala.util.Try
 
 package object api {
   implicit final class Slf4jLoggerOps(logger: => Logger) {
@@ -125,41 +124,47 @@ package object api {
       ZIO.succeed(log(msg))
 
     def log(msg: LogMessage): Unit =
-      if (msg.suppressed) () else msg.level match {
-        case Level.ERROR => logger.error(msg.text)
-        case Level.WARN => logger.warn(msg.text)
-        case Level.INFO => logger.info(msg.text)
-        case Level.DEBUG => logger.debug(msg.text)
-        case Level.TRACE => logger.trace(msg.text)
-      }
+      if (msg.suppressed) ()
+      else
+        msg.level match {
+          case Level.ERROR => logger.error(msg.text)
+          case Level.WARN => logger.warn(msg.text)
+          case Level.INFO => logger.info(msg.text)
+          case Level.DEBUG => logger.debug(msg.text)
+          case Level.TRACE => logger.trace(msg.text)
+        }
 
     def perfLogZIO[R, E, A, E2 >: E, A2 >: A](zio: ZIO[R, E, A])(spec: LogSpec[E2, A2]): ZIO[R, E, A] =
-      if (spec.isNoOp) zio else Clock.nanoTime.flatMap { t0 =>
-        def handleError(cause: Cause[E]): ZIO[Any, E, Nothing] =
-          if (spec.onError.isEmpty && spec.onTermination.isEmpty) ZIO.failCause(cause)
-          else Clock.nanoTime.flatMap { t1 =>
-            val d = Duration.fromNanos(t1 - t0)
+      if (spec.isNoOp) zio
+      else
+        Clock.nanoTime.flatMap { t0 =>
+          def handleError(cause: Cause[E]): ZIO[Any, E, Nothing] =
+            if (spec.onError.isEmpty && spec.onTermination.isEmpty) ZIO.failCause(cause)
+            else
+              Clock.nanoTime.flatMap { t1 =>
+                val d = Duration.fromNanos(t1 - t0)
 
-            val msgs = cause.failureOrCause match {
-              case Right(failure) => spec.onTermination.map(_ (d, failure))
-              case Left(e) => spec.onError.map(_ (d, e))
+                val msgs = cause.failureOrCause match {
+                  case Right(failure) => spec.onTermination.map(_(d, failure))
+                  case Left(e) => spec.onError.map(_(d, e))
+                }
+
+                ZIO.foreach(msgs)(m => logger.logIO(m)) *> ZIO.failCause(cause)
+              }
+
+          def handleSuccess(a: A): ZIO[Any, Nothing, A] =
+            if (spec.onSucceed.isEmpty) ZIO.succeed(a)
+            else {
+              for {
+                t1 <- Clock.nanoTime
+                d = Duration.fromNanos(t1 - t0)
+                msgs = spec.onSucceed.map(_(d, a))
+                _ <- ZIO.foreach(msgs)(m => logger.logIO(m))
+              } yield a
             }
 
-            ZIO.foreach(msgs)(m => logger.logIO(m)) *> ZIO.failCause(cause)
-          }
-
-        def handleSuccess(a: A): ZIO[Any, Nothing, A] =
-          if (spec.onSucceed.isEmpty) ZIO.succeed(a) else {
-            for {
-              t1 <- Clock.nanoTime
-              d = Duration.fromNanos(t1 - t0)
-              msgs = spec.onSucceed.map(_ (d, a))
-              _ <- ZIO.foreach(msgs)(m => logger.logIO(m))
-            } yield a
-          }
-
-        zio.foldCauseZIO(handleError, handleSuccess)
-      }
+          zio.foldCauseZIO(handleError, handleSuccess)
+        }
 
     def perfLogIO[R, E, A](zio: ZIO[R, E, A])(spec: LogSpec[E, A]): ZIO[R, E, A] =
       ZIO.environmentWithZIO[R] { r =>
@@ -168,24 +173,27 @@ package object api {
       }
 
     def perfLog[A](thunk: => A)(spec: LogSpec[Throwable, A]): A =
-      if (spec.isNoOp) thunk else {
+      if (spec.isNoOp) thunk
+      else {
         val t0 = System.nanoTime()
         val res = Try(thunk)
 
         def onError(th: Throwable): Nothing =
-          if (spec.onError.isEmpty) throw th else {
+          if (spec.onError.isEmpty) throw th
+          else {
             val t1 = System.nanoTime()
             val d = Duration.fromNanos(t1 - t0)
-            val msgs = spec.onError.map(_ (d, th))
+            val msgs = spec.onError.map(_(d, th))
             msgs.foreach(logger.log)
             throw th
           }
 
         def onSuccess(a: A): A =
-          if (spec.onSucceed.isEmpty) a else {
+          if (spec.onSucceed.isEmpty) a
+          else {
             val t1 = System.nanoTime()
             val d = Duration.fromNanos(t1 - t0)
-            val msgs = spec.onSucceed.map(_ (d, a))
+            val msgs = spec.onSucceed.map(_(d, a))
             msgs.foreach(logger.log)
             a
           }
@@ -343,7 +351,8 @@ package object api {
 
   implicit final class ZioLoggingOps[R, E, A](val zio: ZIO[R, E, A]) {
     def perfLogZ[E2 >: E, A2 >: A](spec: LogSpec[E2, A2]): ZIO[R with Logging, E, A] =
-      ZIO.environmentWithZIO[Logging](_.get[Logging.Service[Any]].logger)
+      ZIO
+        .environmentWithZIO[Logging](_.get[Logging.Service[Any]].logger)
         .flatMap(_.perfLogZIO(zio)(spec))
   }
 }

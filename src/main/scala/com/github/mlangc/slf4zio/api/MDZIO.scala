@@ -1,21 +1,18 @@
 package com.github.mlangc.slf4zio.api
 
-import scala.collection.JavaConverters._
-
 import com.github.ghik.silencer.silent
 import org.slf4j.MDC
+import scala.collection.JavaConverters._
 import zio.UIO
 import zio.ZIO
 
-/**
- * Convenience APIs for interacting with the MDC context.
- *
- * ==Important==
- * Make sure that you use a fiber aware MDC implementation, as provided
- * for example by <a href="https://github.com/mlangc/zio-interop-log4j2">zio-interop-log4j2</a>.
- * Using the convenience wrappers found here won't make the underlying MDC context implementation
- * aware of ZIO fibers.
- */
+/** Convenience APIs for interacting with the MDC context.
+  *
+  * ==Important==
+  * Make sure that you use a fiber aware MDC implementation, as provided for example by <a
+  * href="https://github.com/mlangc/zio-interop-log4j2">zio-interop-log4j2</a>. Using the convenience wrappers found
+  * here won't make the underlying MDC context implementation aware of ZIO fibers.
+  */
 @silent("JavaConverters")
 abstract class MDZIO {
   final def put(key: String, value: String): UIO[Unit] =
@@ -39,9 +36,8 @@ abstract class MDZIO {
   final def removeAll(keys: Iterable[String]): UIO[Unit] =
     ZIO.foreachDiscard(keys)(remove)
 
-  /**
-   * Puts the given key value pairs in the context, executes the given action, and restores the original context.
-   */
+  /** Puts the given key value pairs in the context, executes the given action, and restores the original context.
+    */
   final def doWith[R, E, A](pairs: Iterable[(String, String)])(zio: ZIO[R, E, A]): ZIO[R, E, A] =
     for {
       state1 <- ZIO.succeed(pairs.toMap)
@@ -49,7 +45,6 @@ abstract class MDZIO {
       newKeys = state1.keySet.diff(state0.keySet)
       a <- (putAll(state1) *> zio).ensuring(removeAll(newKeys) *> putAll(state0))
     } yield a
-
 
   final def doWith[R, E, A](pairs: (String, String)*)(zio: ZIO[R, E, A]): ZIO[R, E, A] =
     doWith(pairs)(zio)
@@ -66,7 +61,6 @@ abstract class MDZIO {
     }
 }
 
-/**
- * See also [[Logging.Service.mdzio]] if you want all logging related calls go through the service.
- */
+/** See also [[Logging.Service.mdzio]] if you want all logging related calls go through the service.
+  */
 object MDZIO extends MDZIO

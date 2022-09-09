@@ -1,9 +1,13 @@
 package com.github.mlangc.slf4zio
 
 import com.github.mlangc.slf4zio.api.Logging
+import zio.duration2DurationOps
+import zio.test._
 import zio.test.Assertion._
-import zio.test.{TestAspect, ZIOSpecDefault, _}
-import zio.{Task, ZIO, duration2DurationOps}
+import zio.test.TestAspect
+import zio.test.ZIOSpecDefault
+import zio.Task
+import zio.ZIO
 
 object ReadmeExamplesTest extends ZIOSpecDefault {
   def spec = suite("ReadmeExamplesTest")(
@@ -30,7 +34,8 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
           // ...
           _ <- logger.perfLogZIO(ZIO.sleep(10.millis))(
             // See below for more examples with `LogSpec`
-            LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}"))
+            LogSpec.onSucceed(d => info"Feeling relaxed after sleeping ${d.render}")
+          )
         } yield ()
       }
 
@@ -55,11 +60,15 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
               logger.trace("Wink wink nudge nudge")
             }
 
-            _ <- ZIO.sleep(8.millis).as(23).perfLog(
-              // See below for more examples with `LogSpec`
-              LogSpec.onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
-                .withThreshold(5.millis)
-            )
+            _ <- ZIO
+              .sleep(8.millis)
+              .as(23)
+              .perfLog(
+                // See below for more examples with `LogSpec`
+                LogSpec
+                  .onSucceed[Int]((d, i) => debug"Finally done with $i after ${d.render}")
+                  .withThreshold(5.millis)
+              )
           } yield ()
         }
       }
@@ -98,7 +107,8 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
 
       // A threshold can be applied to a LogSpec. Nothing will be logged, unless the threshold is exceeded.
       val logSpec2: LogSpec[Any, Any] =
-        LogSpec.onSucceed(d => warn"Operation took ${d.render}")
+        LogSpec
+          .onSucceed(d => warn"Operation took ${d.render}")
           .withThreshold(1.milli)
 
       // Will behave like logSpec1 and eventually log a warning as specified in logSpec2
