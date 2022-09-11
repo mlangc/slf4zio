@@ -1,19 +1,14 @@
 package com.github.mlangc.slf4zio
 
 import com.github.mlangc.slf4zio.api.Logging
-import zio.duration2DurationOps
 import zio.test._
 import zio.test.Assertion._
-import zio.test.TestAspect
-import zio.test.ZIOSpecDefault
-import zio.Task
-import zio.ZIO
 
 object ReadmeExamplesTest extends ZIOSpecDefault {
   def spec = suite("ReadmeExamplesTest")(
     test("creating loggers as needed") {
       import com.github.mlangc.slf4zio.api._
-      import zio.{ZIO, durationInt}
+      import zio._
 
       val effect: Task[Unit] = {
         // ...
@@ -43,7 +38,7 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
     },
     test("Using the convenience trait") {
       import com.github.mlangc.slf4zio.api._
-      import zio.{Random, ZIO, durationInt}
+      import zio._
 
       object SomeObject extends LoggingSupport {
         def doStuff: Task[Unit] = {
@@ -77,7 +72,7 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
     },
     test("Using the service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.{RIO, ZIO}
+      import zio._
 
       val effect: RIO[Logging, Unit] =
         for {
@@ -97,7 +92,7 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
     },
     test("Performance Logging - Using the Logging Service") {
       import com.github.mlangc.slf4zio.api._
-      import zio.{ZIO, durationInt}
+      import zio._
 
       // Simple specs can be combined using the `++` to obtain more complex specs
       val logSpec1: LogSpec[Throwable, Int] =
@@ -125,7 +120,7 @@ object ReadmeExamplesTest extends ZIOSpecDefault {
     },
     test("Working with Markers") {
       import com.github.mlangc.slf4zio.api._
-      import zio.RIO
+      import zio._
 
       val effect: RIO[Logging, Unit] =
         for {
